@@ -139,7 +139,7 @@ export function Tier2ReliabilityCalculator() {
                   raw={fields.infraCostGrowth.raw}
                   error={fields.infraCostGrowth.error}
                   onChange={(v) => set('infraCostGrowth', v)}
-                  hint="Applied to the $4K per-customer figure. Holding it flat assumes linear scaling on a cluster that already fails at peak — treat the result as a floor."
+                  hint={`Applied to the ${usd(T2.hostingPerAccount ?? 0)} per-customer figure. Holding it flat assumes linear scaling on a cluster that already fails at peak — treat the result as a floor.`}
                 />
                 <NumericField
                   label="Average ARR per customer"

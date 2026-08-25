@@ -1,4 +1,5 @@
-import { TIER_LIST } from '@/data/caseFacts'
+import { TIERS, TIER_LIST } from '@/data/caseFacts'
+import { usd } from '@/lib/format'
 import { GTM_MATRIX, GTM_STAGES } from '@/data/narrative'
 import { Card, Section } from './ui/Card'
 import { Tag } from './ui/Tag'
@@ -117,7 +118,7 @@ export function GTMOperatingModel() {
           <p className="text-[12px] leading-[1.5]" style={{ color: 'var(--body)' }}>
             Pipeline → ARR → implementation burden → engineering consumption → contribution margin.
             Today that chain breaks at “implementation burden”, which is why the company can report
-            $22M of Tier-1 ARR and not say what it costs to hold.
+            {usd(TIERS.t1.arr)} of Tier-1 ARR and not say what it costs to hold.
           </p>
         </div>
       </div>

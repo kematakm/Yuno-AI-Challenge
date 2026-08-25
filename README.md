@@ -6,14 +6,17 @@ where next year's engineering and product investment goes across three customer/
 **Thesis:** Protect Tier 1. Fix and scale Tier 2. Automate and instrument Tier 3.
 **Recommended allocation:** Tier 1 Enterprise 30% · Tier 2 Mid-Market 55% · Tier 3 Self-Serve 15%.
 
+**Live dashboard:** https://claude.ai/code/artifact/2ede08e7-deaa-4c67-8530-ff9a9646096b
+
 ## Run it
 
 ```bash
 cd dashboard
 npm install
-npm run dev          # http://localhost:5173
-npm run build        # multi-asset bundle in dashboard/dist
-npm run build:single # one self-contained HTML file in dashboard/dist-single
+npm run dev            # http://localhost:5173
+npm run build          # multi-asset bundle in dashboard/dist
+npm run build:single   # one self-contained HTML file in dashboard/dist-single
+npm run build:artifact # regenerates docs/dashboard.html for hosting / circulation
 ```
 
 ## What it answers
@@ -35,7 +38,9 @@ and the formula reference.
 
 ## Contents
 
-- [`dashboard/`](dashboard) — the React + TypeScript + Tailwind + Recharts dashboard (this is the deliverable).
+- [`dashboard/`](dashboard) — the React + TypeScript + Tailwind + Recharts source (this is the deliverable).
+- [`docs/dashboard.html`](docs/dashboard.html) — the built dashboard as one self-contained file.
+  Open it directly in a browser; it is also the source published at the link above.
 - [`docs/engineering-capital-allocation.md`](docs/engineering-capital-allocation.md) — the written
   recommendation memo prepared for Board review. Source of record for the narrative.
 - `docs/engineering-capital-allocation.html` — the same memo as a self-contained page for circulation.

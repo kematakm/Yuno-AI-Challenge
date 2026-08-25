@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { RECOMMENDED_ALLOCATION } from '@/data/allocation'
 import { BENCHMARKS } from '@/data/benchmarks'
 import { COMPANY, TIERS, TIER_DETAIL } from '@/data/caseFacts'
 import { derivedAvgArr, sreFteEquivalent, tier3Funnel, tier3OriginShareOfTier2Base } from '@/lib/calc'
@@ -399,7 +400,10 @@ export function Tier3FunnelCalculator() {
             </div>
 
             <Note>
-              <strong style={{ color: 'var(--ink)' }}>What the 15% buys.</strong> Quotas, trial-tier
+              <strong style={{ color: 'var(--ink)' }}>
+                What the {RECOMMENDED_ALLOCATION.t3}% buys.
+              </strong>{' '}
+              Quotas, trial-tier
               rate limiting, abuse detection and non-paging alert routing are cheap, automated and
               apply to every key at once. They are also the only way to find out whether this channel
               is an acquisition engine or a cost — killing it now forecloses the measurement. Tier-3

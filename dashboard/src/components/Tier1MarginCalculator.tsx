@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { BENCHMARKS } from '@/data/benchmarks'
 import { COMPANY, TIERS, TIER_DETAIL } from '@/data/caseFacts'
 import { TIER1_COST_CATEGORIES, tier1Margin, type Tier1CostKey, type Tier1Costs } from '@/lib/calc'
-import { pct, usd, usdExact } from '@/lib/format'
+import { pct, ratioPct, usd, usdExact } from '@/lib/format'
 import { SPEC, parseNumeric } from '@/lib/validation'
 import { useNumericFields } from '@/hooks/useNumericFields'
 import { MarginWaterfall } from './charts/MarginWaterfall'
@@ -110,13 +110,13 @@ export function Tier1MarginCalculator() {
             <span className="eyebrow mb-2 flex items-center">
               Engineering cost helper
               <Info>
-                {TIER_DETAIL.t1.velocityShare * 100}% of developer velocity went to{' '}
+                {ratioPct(TIER_DETAIL.t1.velocityShare, 0)} of developer velocity went to{' '}
                 {TIER_DETAIL.t1.velocityAccounts} Tier-1 accounts. Against {COMPANY.engineering.backend}{' '}
                 backend engineers that is ≈{' '}
                 {(TIER_DETAIL.t1.velocityShare * COMPANY.engineering.backend).toFixed(1)} people; against
                 all {COMPANY.engineering.total} technical staff ≈{' '}
                 {(TIER_DETAIL.t1.velocityShare * COMPANY.engineering.total).toFixed(1)}. The packet does
-                not say which base the 68% is measured against, and it does not state a loaded cost per
+                not say which base that share is measured against, and it does not state a loaded cost per
                 engineer — so both inputs are yours.
               </Info>
             </span>
@@ -127,7 +127,7 @@ export function Tier1MarginCalculator() {
                 error={engineers.error}
                 onChange={setEngineersRaw}
                 placeholder="e.g. 19"
-                hint={`68% × ${COMPANY.engineering.backend} backend ≈ ${(
+                hint={`${ratioPct(TIER_DETAIL.t1.velocityShare, 0)} × ${COMPANY.engineering.backend} backend ≈ ${(
                   TIER_DETAIL.t1.velocityShare * COMPANY.engineering.backend
                 ).toFixed(1)} FTE. Base unstated in the packet.`}
               />

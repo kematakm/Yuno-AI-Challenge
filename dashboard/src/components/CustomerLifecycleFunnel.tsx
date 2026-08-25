@@ -1,6 +1,6 @@
-import { TIERS, TIER_DETAIL } from '@/data/caseFacts'
+import { COMPANY, TIERS, TIER_DETAIL } from '@/data/caseFacts'
 import { tier3OriginShareOfTier2Base } from '@/lib/calc'
-import { num } from '@/lib/format'
+import { num, ratioPct } from '@/lib/format'
 import { Card, Note, Section } from './ui/Card'
 import { DataNeeded, Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
@@ -168,7 +168,10 @@ export function CustomerLifecycleFunnel() {
                 { m: 'Time to graduate from first key to production traffic', why: 'Tells us whether to invest in activation or in guardrails' },
                 { m: 'Retention / NRR of Tier-3-originated customers', why: 'Decides whether graduates are better or worse than bought customers' },
                 { m: 'Tier-2 → Tier-1 graduation rate and trigger', why: 'Tells us whether enterprise demand is created or merely inherited' },
-                { m: 'Tier-3 compute cost per active key', why: 'The only unattributed line in a cloud bill that grew 72%' },
+                {
+                  m: 'Tier-3 compute cost per active key',
+                  why: `The only unattributed line in a cloud bill that grew ${ratioPct(COMPANY.cloudCostGrowthYoY, 0)}`,
+                },
               ].map((x) => (
                 <li key={x.m} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
                   <span className="mt-[3px]">

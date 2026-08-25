@@ -183,8 +183,8 @@ export function WhereTheMoneyIs() {
               },
             ]}
             markers={[
-              { value: t2Cogs, label: 'Tier 2', sub: '$4K / customer', color: T2.ink, side: 'above' },
-              { value: t1Cogs, label: 'Tier 1', sub: '$180K / customer', color: T1.ink, side: 'below' },
+              { value: t2Cogs, label: 'Tier 2', sub: `${usd(T2.hostingPerAccount ?? 0)} / customer`, color: T2.ink, side: 'above' },
+              { value: t1Cogs, label: 'Tier 1', sub: `${usd(T1.hostingPerAccount ?? 0)} / customer`, color: T1.ink, side: 'below' },
             ]}
             caption={
               <>
