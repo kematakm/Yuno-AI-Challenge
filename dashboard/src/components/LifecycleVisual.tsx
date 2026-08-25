@@ -61,9 +61,9 @@ export function LifecycleVisual() {
             {LIFECYCLE_QUESTION}
           </p>
           <p className="mt-2 text-[11.5px] leading-[1.5]" style={{ color: 'var(--muted)' }}>
-            If the answer is no, every successful customer eventually lands on isolated architecture
-            with bespoke engineering, and the Tier-1 constraint regenerates indefinitely. That makes an
-            enterprise-capable multi-tenant path a roadmap question, not an infrastructure one.
+            If the answer is no, successful customers tend to land on isolated architecture with
+            customer-specific engineering, and the Tier-1 constraint regenerates with each one. That
+            makes an enterprise-capable multi-tenant path a roadmap question, not an infrastructure one.
           </p>
         </div>
       </div>

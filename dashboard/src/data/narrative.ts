@@ -20,7 +20,7 @@ export const FIVE_QUESTIONS = [
   },
   {
     n: 3,
-    q: 'Where are engineering and ops resources trapped?',
+    q: 'Where is engineering capacity trapped?',
     a: '3 Tier-1 accounts took 68% of developer velocity. 52% of alerts come from Tier 3.',
     anchor: 'trapped',
   },
@@ -38,11 +38,13 @@ export const FIVE_QUESTIONS = [
   },
 ] as const
 
-/** Section 3 — where engineering is getting trapped. */
+/** Section 3 — the engineering capacity trap. */
 export const LEVERAGE_CARDS: Record<
   TierId,
   {
-    headline: string
+    /** The single fact that carries the card. Rendered as the dominant number. */
+    bigNumber: string
+    bigCaption: string
     flow: string[]
     label: string
     labelTone: 'bad' | 'good' | 'watch'
@@ -50,20 +52,22 @@ export const LEVERAGE_CARDS: Record<
   }
 > = {
   t1: {
-    headline: '3 of 18 customers consumed 68% of developer velocity',
+    bigNumber: '68%',
+    bigCaption: 'of developer velocity consumed by custom patches for 3 of 18 accounts',
     flow: [
       'Legacy immutable database framework',
       'Custom backend patches per account',
       '18-day deployment clearance',
       'Recurring engineering dependency',
     ],
-    label: 'Customer-by-customer engineering',
+    label: 'Custom Engineering Dependency',
     labelTone: 'bad',
     footnote:
-      'Effort does not amortise: each new enterprise logo on isolated architecture reproduces the dependency rather than spreading it.',
+      'Single-tenant customisation limits engineering leverage as customer-specific work increases: effort attaches to the account it was written for rather than amortising across the tier.',
   },
   t2: {
-    headline: 'One platform fix can benefit all 140 customers',
+    bigNumber: '140',
+    bigCaption: 'customers reached by one platform fix — and every customer added after it',
     flow: [
       'Peak-hour rate limits fail (9–11 AM EST)',
       'Cascading timeouts across the shared cluster',
@@ -76,7 +80,8 @@ export const LEVERAGE_CARDS: Record<
       'The asymmetry, not the cost, is the argument: Tier 1’s problem repeats per customer, Tier 2’s does not.',
   },
   t3: {
-    headline: '52% of automated on-call alerts originate here',
+    bigNumber: '52%',
+    bigCaption: 'of automated on-call alerts originate in the trial tier, carried by 4 SREs',
     flow: [
       'Poorly written loops and runaway scripts',
       'Abusive configurations on the trial tier',

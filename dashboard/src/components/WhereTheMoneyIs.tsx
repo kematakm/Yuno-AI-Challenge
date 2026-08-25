@@ -189,10 +189,15 @@ export function WhereTheMoneyIs() {
             caption={
               <>
                 Shaded ranges are external benchmarks for infrastructure/COGS as a share of revenue,
-                shown for comparison only. They are not used to impute any company figure. Tier 1
-                consumes roughly {(t1Cogs / t2Cogs).toFixed(1)}× the hosting per ARR dollar that Tier 2
-                does, and sits below its own architecture's typical band — hosting alone, before
-                engineering.
+                shown for comparison only. They are not used to impute any company figure.{' '}
+                <strong style={{ color: 'var(--ink)' }}>
+                  Hosting alone appears efficient versus external benchmarks; fully loaded cost-to-serve
+                  remains unknown because engineering, SRE, QA, implementation and support are not
+                  allocated by account.
+                </strong>{' '}
+                Within hosting, Tier 1 consumes roughly {(t1Cogs / t2Cogs).toFixed(1)}× the spend per ARR
+                dollar that Tier 2 does — a difference in architecture cost, not a verdict on either
+                tier's economics.
               </>
             }
           />

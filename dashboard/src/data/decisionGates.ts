@@ -30,6 +30,18 @@ export interface DecisionGate {
   responseNote: string
 }
 
+/**
+ * The single gate shown in the executive header. It is the falsification test for
+ * the recommendation's own central bet, stated before anyone is asked to fund it.
+ */
+export const HEADLINE_GATE = {
+  condition: 'If Tier-2 availability reaches 99.9% and logo churn does not improve',
+  consequence:
+    'reliability was not the constraint. The Tier-2 thesis is re-tested and capital shifts from platform work to fit, pricing and onboarding.',
+  measuredBy: 'Availability by hour + coded churn-reason analysis',
+  by: 'Day 90',
+} as const
+
 export const DECISION_GATES: DecisionGate[] = [
   {
     id: 'more-t1',

@@ -18,7 +18,7 @@ import { Tag } from '@/components/ui/Tag'
 const NAV = [
   { id: 'money', label: 'Money & cost' },
   { id: 'scorecard', label: 'Scorecard' },
-  { id: 'trapped', label: 'Where capacity goes' },
+  { id: 'trapped', label: 'Capacity trap' },
   { id: 'funnel', label: 'Funnel' },
   { id: 'calculator', label: 'Calculator' },
   { id: 'gates', label: 'Decision gates' },

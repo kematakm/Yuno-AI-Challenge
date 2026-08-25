@@ -18,6 +18,12 @@ interface Cell {
   value: ReactNode
   tag: Provenance
   verdict?: Verdict
+  /**
+   * A positional statement against a benchmark WITHOUT a health verdict. Used
+   * where the metric is only part of the picture — hosting is not cost-to-serve,
+   * so "below the band" must not read as "healthy".
+   */
+  neutral?: string
   note?: string
 }
 
@@ -127,19 +133,19 @@ function buildRows(): Row[] {
     {
       key: 'hostarr',
       label: 'Hosting as % of ARR',
-      hint: 'Benchmark bands: multi-tenant 10–25%, single-tenant 25–40% of revenue.',
+      hint: 'Benchmark bands: multi-tenant 10–25%, single-tenant 25–40% of revenue. Shown as a position, not a health verdict: hosting is one line of cost-to-serve, and the rest is unallocated.',
       cells: {
         t1: {
           value: pct(hostingPctOfArr('t1') ?? 0),
           tag: 'derived',
-          verdict: cogsVerdict(hostingPctOfArr('t1') ?? 0, 'single'),
-          note: 'hosting only — excludes engineering',
+          neutral: cogsVerdict(hostingPctOfArr('t1') ?? 0, 'single').text,
+          note: 'Hosting only. Fully loaded cost-to-serve is unknown — engineering, SRE, QA, implementation and support are not allocated by account.',
         },
         t2: {
           value: pct(hostingPctOfArr('t2') ?? 0),
           tag: 'derived',
-          verdict: cogsVerdict(hostingPctOfArr('t2') ?? 0, 'multi'),
-          note: 'hosting only — excludes engineering',
+          neutral: cogsVerdict(hostingPctOfArr('t2') ?? 0, 'multi').text,
+          note: 'Hosting only. Fully loaded cost-to-serve is unknown — engineering, SRE, QA, implementation and support are not allocated by account.',
         },
         t3: needed('Tier-3 hosting cost was never measured'),
       },
@@ -347,6 +353,18 @@ function CellView({ cell, align = 'left' }: { cell: Cell; align?: 'left' | 'righ
       {cell.verdict && (
         <div className="mt-1">
           <StatusDot status={cell.verdict.status} label={cell.verdict.text} />
+        </div>
+      )}
+      {cell.neutral && (
+        <div className="mt-1">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold tracking-[0.03em] whitespace-nowrap"
+            style={{ color: 'var(--muted)', background: 'var(--surface-3)', border: '1px solid var(--rule)' }}
+            title="Position against an external benchmark. Not a health verdict — this metric covers only part of cost-to-serve."
+          >
+            <span className="h-[6px] w-[6px] shrink-0 rounded-full" style={{ background: 'var(--rule-strong)' }} />
+            {cell.neutral}
+          </span>
         </div>
       )}
       {cell.note && (

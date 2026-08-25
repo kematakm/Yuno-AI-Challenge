@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
 import { ALLOCATION_RATIONALE, RECOMMENDED_ALLOCATION, THESIS } from '@/data/allocation'
 import { COMPANY, TIER_LIST } from '@/data/caseFacts'
+import { HEADLINE_GATE } from '@/data/decisionGates'
 import type { TierId } from '@/data/types'
 import { usd, ratioPct, num } from '@/lib/format'
 import { AllocationChart } from './AllocationChart'
-import { Card, Note } from './ui/Card'
+import { Card } from './ui/Card'
 import { DataNeeded, Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
+
+/** The tier carrying the largest recommended allocation — the visual centre of gravity. */
+const PRIMARY_TIER: TierId = (Object.keys(RECOMMENDED_ALLOCATION) as TierId[]).reduce((a, b) =>
+  RECOMMENDED_ALLOCATION[a] >= RECOMMENDED_ALLOCATION[b] ? a : b,
+)
 
 function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
@@ -108,11 +114,16 @@ export function ExecutiveHeader({
               const v = allocation[t.id]
               const rec = RECOMMENDED_ALLOCATION[t.id]
               const delta = v - rec
+              const primary = t.id === PRIMARY_TIER
               return (
                 <div
                   key={t.id}
                   className="rounded-[4px] border p-3"
-                  style={{ borderColor: 'var(--rule)', background: 'var(--surface-2)' }}
+                  style={{
+                    borderColor: primary ? t.accent : 'var(--rule)',
+                    borderWidth: primary ? 2 : 1,
+                    background: primary ? t.accentSoft : 'var(--surface-2)',
+                  }}
                 >
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="flex min-w-0 items-center gap-1.5">
@@ -134,6 +145,14 @@ export function ExecutiveHeader({
                       {v}%
                     </span>
                   </div>
+                  {primary && (
+                    <div
+                      className="mt-1.5 inline-flex rounded-[2px] px-1.5 py-px text-[9px] font-bold tracking-[0.1em]"
+                      style={{ background: t.accent, color: t.onAccent }}
+                    >
+                      PRIMARY BET
+                    </div>
+                  )}
                   <p className="mt-1.5 text-[11.5px] leading-[1.45]" style={{ color: 'var(--muted)' }}>
                     {ALLOCATION_RATIONALE[t.id]}
                   </p>
@@ -146,6 +165,34 @@ export function ExecutiveHeader({
                 </div>
               )
             })}
+          </div>
+
+          <div
+            className="mt-4 flex flex-wrap items-start gap-x-4 gap-y-2 rounded-[4px] border-l-[3px] px-3 py-2.5"
+            style={{
+              borderColor: 'var(--pv-need)',
+              background: 'var(--pv-need-soft)',
+              borderTop: '1px solid color-mix(in srgb, var(--pv-need) 22%, transparent)',
+              borderRight: '1px solid color-mix(in srgb, var(--pv-need) 22%, transparent)',
+              borderBottom: '1px solid color-mix(in srgb, var(--pv-need) 22%, transparent)',
+            }}
+          >
+            <span
+              className="shrink-0 rounded-[2px] px-1.5 py-px text-[9px] font-bold tracking-[0.1em]"
+              style={{ background: 'var(--pv-need)', color: 'var(--surface)' }}
+            >
+              DECISION GATE
+            </span>
+            <p className="min-w-0 flex-1 text-[12px] leading-[1.5]" style={{ color: 'var(--body)' }}>
+              <strong style={{ color: 'var(--ink)' }}>{HEADLINE_GATE.condition}</strong>,{' '}
+              {HEADLINE_GATE.consequence}
+              <span className="ml-1.5" style={{ color: 'var(--muted)' }}>
+                {HEADLINE_GATE.by} · {HEADLINE_GATE.measuredBy}.
+              </span>{' '}
+              <a href="#gates" className="font-semibold underline underline-offset-2" style={{ color: 'var(--pv-need)' }}>
+                All eight gates
+              </a>
+            </p>
           </div>
         </div>
       </Card>
@@ -195,22 +242,58 @@ function CompanyContext() {
   )
 }
 
-/** The reading key. Without this the rest of the page is not auditable. */
+/**
+ * The reading key. This case turns on separating what the company observed from
+ * what an outside benchmark says from what the reader assumed, so the three
+ * primary categories lead and the two secondary ones follow.
+ */
 function ProvenanceLegend() {
   return (
-    <div className="mt-3">
-      <Note>
-        <span className="mr-2 inline-flex flex-wrap items-center gap-1.5 align-middle">
-          <Tag kind="fact" />
-          <Tag kind="derived" />
-          <Tag kind="benchmark" />
-          <Tag kind="input" />
-          <Tag kind="calc" />
-          <Tag kind="needed" />
+    <div
+      className="mt-3 rounded-[5px] border px-3.5 py-2.5"
+      style={{ borderColor: 'var(--rule-strong)', background: 'var(--surface)' }}
+    >
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <span className="eyebrow shrink-0" style={{ color: 'var(--ink)' }}>
+          How to read this page
         </span>
-        Every figure on this page carries one of these tags. External benchmarks are never used to
-        impute a company number, and unmeasured values are left blank rather than estimated.
-      </Note>
+        <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+          {(
+            [
+              ['fact', 'Stated in the case packet'],
+              ['benchmark', 'Industry range — not a company number'],
+              ['input', 'Entered by you, not observed'],
+            ] as const
+          ).map(([kind, gloss]) => (
+            <li key={kind} className="flex items-center gap-1.5">
+              <Tag kind={kind} />
+              <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                {gloss}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="hairline mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-2">
+        <span className="flex items-center gap-1.5">
+          <Tag kind="derived" />
+          <span className="text-[10.5px]" style={{ color: 'var(--muted)' }}>
+            Arithmetic on case facts only
+          </span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Tag kind="calc" />
+          <span className="text-[10.5px]" style={{ color: 'var(--muted)' }}>
+            Computed from your assumptions — illustrative
+          </span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Tag kind="needed" />
+          <span className="text-[10.5px]" style={{ color: 'var(--muted)' }}>
+            Never measured — left blank rather than estimated
+          </span>
+        </span>
+      </div>
     </div>
   )
 }

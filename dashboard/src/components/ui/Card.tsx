@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { cn } from './cn'
 
 export function Section({
@@ -42,12 +42,14 @@ export function Card({
   className,
   accent,
   padded = true,
+  style,
 }: {
   children: ReactNode
   className?: string
   /** Left rule in a tier colour. */
   accent?: string
   padded?: boolean
+  style?: CSSProperties
 }) {
   return (
     <div
@@ -58,7 +60,7 @@ export function Card({
         padded && 'p-4',
         className,
       )}
-      style={accent ? { borderLeft: `3px solid ${accent}` } : undefined}
+      style={{ ...(accent ? { borderLeft: `3px solid ${accent}` } : {}), ...style }}
     >
       {children}
     </div>

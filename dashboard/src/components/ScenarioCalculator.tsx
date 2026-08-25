@@ -31,6 +31,31 @@ export function ScenarioCalculator({ allocation }: { allocation: AllocationState
       }
     >
       <div className="grid gap-5">
+        <div
+          className="flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-[5px] border px-3.5 py-2"
+          style={{ borderColor: 'var(--rule)', background: 'var(--surface)' }}
+        >
+          <span className="eyebrow shrink-0" style={{ color: 'var(--ink)' }}>
+            Reading key
+          </span>
+          {(
+            [
+              ['fact', 'Case fact'],
+              ['benchmark', 'External benchmark'],
+              ['input', 'Assumption you entered'],
+              ['calc', 'Calculated — illustrative'],
+              ['needed', 'Never measured'],
+            ] as const
+          ).map(([kind, gloss]) => (
+            <span key={kind} className="flex items-center gap-1.5">
+              <Tag kind={kind} />
+              <span className="text-[10.5px]" style={{ color: 'var(--muted)' }}>
+                {gloss}
+              </span>
+            </span>
+          ))}
+        </div>
+
         <AllocationPanel state={allocation} />
         <Tier1MarginCalculator />
         <Tier2ReliabilityCalculator />
@@ -85,6 +110,42 @@ function AllocationPanel({ state }: { state: AllocationState }) {
 
       <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid content-start gap-4">
+          {/* The logic, before anyone touches a slider. */}
+          <div className="grid grid-cols-3 gap-2">
+            {TIER_LIST.map((t) => {
+              const primary = t.recommendedAllocation === Math.max(...TIER_LIST.map((x) => x.recommendedAllocation))
+              return (
+                <div
+                  key={t.id}
+                  className="rounded-[4px] px-2.5 py-2 text-center"
+                  style={{
+                    background: primary ? t.accent : t.accentSoft,
+                    border: `1px solid ${t.accent}`,
+                  }}
+                >
+                  <div
+                    className="num text-[24px] leading-none font-bold"
+                    style={{ color: primary ? t.onAccent : t.ink, letterSpacing: '-0.03em' }}
+                  >
+                    {state.allocation[t.id]}%
+                  </div>
+                  <div
+                    className="mt-1 text-[10px] font-bold tracking-[0.12em]"
+                    style={{ color: primary ? t.onAccent : t.ink }}
+                  >
+                    {t.role}
+                  </div>
+                  <div
+                    className="text-[9.5px] leading-tight"
+                    style={{ color: primary ? t.onAccent : 'var(--muted)', opacity: primary ? 0.8 : 1 }}
+                  >
+                    {t.name}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
           {TIER_LIST.map((t) => (
             <TierAllocationRow key={t.id} tierId={t.id} state={state} />
           ))}
