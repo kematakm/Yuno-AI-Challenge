@@ -1,0 +1,4 @@
+node_modules
+dashboard/dist
+dashboard/dist-single
+docs/dashboard.html
