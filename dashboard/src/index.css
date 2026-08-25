@@ -1,0 +1,403 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   Palette — light default, dark via prefers-color-scheme and [data-theme].
+   Raw tokens live on :root so a single set of Tailwind utilities works in both
+   themes without dark: variants.
+   ========================================================================== */
+:root {
+  --paper: #f4f6f8;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  --surface-3: #f1f4f7;
+  --ink: #0f1820;
+  --body: #2b3843;
+  --muted: #62707d;
+  --faint: #6b7683;
+  --rule: #dee3e9;
+  --rule-strong: #c2cad3;
+
+  /* Tier identity */
+  --t1: #14556e;
+  --t2: #23768e;
+  --t3: #7fb6ca;
+  --t1-soft: #e5eef3;
+  --t2-soft: #e2f0f5;
+  --t3-soft: #eef6f9;
+  /* Text colour for a tier ON a light surface (fills are too light for text). */
+  --t1-ink: #14556e;
+  --t2-ink: #1f6c82;
+  --t3-ink: #37748b;
+  /* Text colour ON a tier fill. */
+  --on-t1: #ffffff;
+  --on-t2: #ffffff;
+  --on-t3: #10222b;
+
+  /* Benchmark status */
+  --good: #1c6f52;
+  --good-soft: #e4f1ea;
+  --watch: #91661a;
+  --watch-soft: #f7efdf;
+  --bad: #9d3626;
+  --bad-soft: #f8e9e5;
+
+  /* Provenance */
+  --pv-fact: #3a4753;
+  --pv-fact-soft: #eef1f4;
+  --pv-bench: #565da0;
+  --pv-bench-soft: #ecedf7;
+  --pv-input: #2c6aa8;
+  --pv-input-soft: #e8f0f8;
+  --pv-calc: #12786c;
+  --pv-calc-soft: #e3f2ef;
+  --pv-need: #9c4a21;
+  --pv-need-soft: #f9efe8;
+
+  --grid: #e7ebef;
+  --shadow-card: 0 1px 2px rgba(15, 24, 32, 0.04), 0 10px 28px -22px rgba(15, 24, 32, 0.45);
+  --shadow-lift: 0 1px 2px rgba(15, 24, 32, 0.05), 0 18px 40px -28px rgba(15, 24, 32, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #0c1218;
+    --surface: #131c24;
+    --surface-2: #17212a;
+    --surface-3: #1c2732;
+    --ink: #e9eff4;
+    --body: #bdc9d4;
+    --muted: #8c99a6;
+    --faint: #6d7b88;
+    --rule: #24303a;
+    --rule-strong: #35434f;
+
+    --t1: #4fa8c7;
+    --t2: #79c6dc;
+    --t3: #a9dcea;
+    --t1-soft: #15303c;
+    --t2-soft: #142c36;
+    --t3-soft: #13252f;
+    --t1-ink: #4fa8c7;
+    --t2-ink: #79c6dc;
+    --t3-ink: #a9dcea;
+    --on-t1: #08131a;
+    --on-t2: #08131a;
+    --on-t3: #08131a;
+
+    --good: #55b58c;
+    --good-soft: #12281f;
+    --watch: #d3a45c;
+    --watch-soft: #2a2113;
+    --bad: #e08670;
+    --bad-soft: #2c1a15;
+
+    --pv-fact: #a9b6c2;
+    --pv-fact-soft: #1b242d;
+    --pv-bench: #949ad9;
+    --pv-bench-soft: #1c1e2e;
+    --pv-input: #6aa6de;
+    --pv-input-soft: #14212e;
+    --pv-calc: #4bbdae;
+    --pv-calc-soft: #102624;
+    --pv-need: #e0975f;
+    --pv-need-soft: #291a11;
+
+    --grid: #223039;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px -22px rgba(0, 0, 0, 0.9);
+    --shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.55), 0 18px 40px -28px rgba(0, 0, 0, 0.95);
+  }
+}
+
+:root[data-theme='dark'] {
+  --paper: #0c1218;
+  --surface: #131c24;
+  --surface-2: #17212a;
+  --surface-3: #1c2732;
+  --ink: #e9eff4;
+  --body: #bdc9d4;
+  --muted: #8c99a6;
+  --faint: #6d7b88;
+  --rule: #24303a;
+  --rule-strong: #35434f;
+
+  --t1: #4fa8c7;
+  --t2: #79c6dc;
+  --t3: #a9dcea;
+  --t1-soft: #15303c;
+  --t2-soft: #142c36;
+  --t3-soft: #13252f;
+  --t1-ink: #4fa8c7;
+  --t2-ink: #79c6dc;
+  --t3-ink: #a9dcea;
+  --on-t1: #08131a;
+  --on-t2: #08131a;
+  --on-t3: #08131a;
+
+  --good: #55b58c;
+  --good-soft: #12281f;
+  --watch: #d3a45c;
+  --watch-soft: #2a2113;
+  --bad: #e08670;
+  --bad-soft: #2c1a15;
+
+  --pv-fact: #a9b6c2;
+  --pv-fact-soft: #1b242d;
+  --pv-bench: #949ad9;
+  --pv-bench-soft: #1c1e2e;
+  --pv-input: #6aa6de;
+  --pv-input-soft: #14212e;
+  --pv-calc: #4bbdae;
+  --pv-calc-soft: #102624;
+  --pv-need: #e0975f;
+  --pv-need-soft: #291a11;
+
+  --grid: #223039;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 28px -22px rgba(0, 0, 0, 0.9);
+  --shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.55), 0 18px 40px -28px rgba(0, 0, 0, 0.95);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+
+  --color-t1: var(--t1);
+  --color-t2: var(--t2);
+  --color-t3: var(--t3);
+  --color-t1-soft: var(--t1-soft);
+  --color-t2-soft: var(--t2-soft);
+  --color-t3-soft: var(--t3-soft);
+  --color-t1-ink: var(--t1-ink);
+  --color-t2-ink: var(--t2-ink);
+  --color-t3-ink: var(--t3-ink);
+
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-watch: var(--watch);
+  --color-watch-soft: var(--watch-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+
+  --color-pv-fact: var(--pv-fact);
+  --color-pv-fact-soft: var(--pv-fact-soft);
+  --color-pv-bench: var(--pv-bench);
+  --color-pv-bench-soft: var(--pv-bench-soft);
+  --color-pv-input: var(--pv-input);
+  --color-pv-input-soft: var(--pv-input-soft);
+  --color-pv-calc: var(--pv-calc);
+  --color-pv-calc-soft: var(--pv-calc-soft);
+  --color-pv-need: var(--pv-need);
+  --color-pv-need-soft: var(--pv-need-soft);
+
+  --font-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+}
+
+/* ============================================================================
+   Base
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--body);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Focus ring, consistent everywhere */
+:where(button, input, select, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--t2);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ============================================================================
+   Component primitives
+   ========================================================================== */
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .eyebrow {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Numeric / text assumption inputs */
+  .field {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--rule-strong);
+    border-bottom-width: 2px;
+    border-bottom-color: var(--pv-input);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .field::placeholder {
+    color: var(--faint);
+    font-style: italic;
+  }
+  .field:hover {
+    background: var(--surface-3);
+  }
+  .field[data-empty='true'] {
+    border-bottom-color: var(--pv-need);
+    border-bottom-style: dashed;
+  }
+  .field[data-invalid='true'] {
+    border-color: var(--bad);
+    background: var(--bad-soft);
+  }
+
+  /* Range inputs, cross-browser */
+  .range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .range::-webkit-slider-runnable-track {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--rule);
+  }
+  .range::-moz-range-track {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--rule);
+  }
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: var(--accent, var(--t2));
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--rule-strong);
+  }
+  .range::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--accent, var(--t2));
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--rule-strong);
+  }
+  .range:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--rule-strong);
+    background: var(--surface-2);
+    color: var(--body);
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--surface-3);
+    border-color: var(--muted);
+    color: var(--ink);
+  }
+  .btn[data-active='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--surface);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .hairline {
+    border-top: 1px solid var(--rule);
+  }
+}
+
+/* Recharts: keep chart chrome on-palette */
+.recharts-cartesian-axis-tick text {
+  fill: var(--muted);
+  font-size: 11px;
+  font-family: var(--font-sans);
+}
+.recharts-cartesian-grid line {
+  stroke: var(--grid);
+}
+.recharts-surface:focus {
+  outline: none;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}
