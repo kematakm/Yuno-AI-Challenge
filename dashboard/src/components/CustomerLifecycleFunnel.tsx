@@ -38,8 +38,8 @@ export function CustomerLifecycleFunnel() {
   return (
     <Section
       id="funnel"
-      eyebrow="Customer growth funnel"
-      title="The funnel we cannot currently measure"
+      eyebrow="Layer 2 · The gap"
+      title="Customer growth lifecycle"
       lede="One transition figure exists in the entire packet. Everything else that would tell us whether the self-serve channel creates enterprise customers has never been captured."
       aside={<Tag kind="needed" label="3 of 4 transitions unmeasured" />}
     >
@@ -168,6 +168,10 @@ export function CustomerLifecycleFunnel() {
                 { m: 'Time to graduate from first key to production traffic', why: 'Tells us whether to invest in activation or in guardrails' },
                 { m: 'Retention / NRR of Tier-3-originated customers', why: 'Decides whether graduates are better or worse than bought customers' },
                 { m: 'Tier-2 → Tier-1 graduation rate and trigger', why: 'Tells us whether enterprise demand is created or merely inherited' },
+                {
+                  m: 'Contribution-margin change when customers graduate tiers',
+                  why: 'Decides whether growing a customer makes them more or less profitable to serve',
+                },
                 {
                   m: 'Tier-3 compute cost per active key',
                   why: `The only unattributed line in a cloud bill that grew ${ratioPct(COMPANY.cloudCostGrowthYoY, 0)}`,

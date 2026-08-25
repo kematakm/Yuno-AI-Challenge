@@ -103,7 +103,7 @@ export function GTMOperatingModel() {
           <div className="eyebrow mb-1">The qualification rule that changes the economics</div>
           <p className="text-[12px] leading-[1.5]" style={{ color: 'var(--body)' }}>
             <strong style={{ color: 'var(--ink)' }}>
-              High ARR alone should not automatically qualify a customer for bespoke engineering.
+              ACV alone does not qualify an enterprise deal.
             </strong>{' '}
             Enterprise qualification adds an architecture-fit screen: customisation burden,
             implementation requirements, expected engineering dependency, ACV and strategic importance —

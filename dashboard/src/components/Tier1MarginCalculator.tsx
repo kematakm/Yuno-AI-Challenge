@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
 import { BENCHMARKS } from '@/data/benchmarks'
 import { COMPANY, TIERS, TIER_DETAIL } from '@/data/caseFacts'
-import { TIER1_COST_CATEGORIES, tier1Margin, type Tier1CostKey, type Tier1Costs } from '@/lib/calc'
+import { TIER1_COST_CATEGORIES } from '@/lib/calc'
 import { pct, ratioPct, usd, usdExact } from '@/lib/format'
 import { SPEC, parseNumeric } from '@/lib/validation'
-import { useNumericFields } from '@/hooks/useNumericFields'
+import { SIGNAL_THRESHOLDS } from '@/lib/signals'
+import { Interpretation, type Verdict } from './ui/Interpretation'
+import type { Tier1Scenario } from '@/hooks/useScenario'
 import { MarginWaterfall } from './charts/MarginWaterfall'
 import { BenchmarkScale } from './ui/BenchmarkScale'
 import { Card, Note, Stat } from './ui/Card'
@@ -13,34 +14,23 @@ import { PanelHeader } from './ui/PanelHeader'
 import { DataNeeded, Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
 
-const COST_SPECS = Object.fromEntries(
-  TIER1_COST_CATEGORIES.map((c) => [c.key, SPEC.money]),
-) as Record<Tier1CostKey, typeof SPEC.money>
-
-const EMPTY = Object.fromEntries(TIER1_COST_CATEGORIES.map((c) => [c.key, ''])) as Record<
-  Tier1CostKey,
-  string
->
-
 /**
  * B. Tier-1 fully loaded contribution margin.
  * ARR and hosting are case facts. Every other cost line is blank on load —
  * the packet does not contain them and the dashboard will not invent them.
  */
-export function Tier1MarginCalculator() {
-  const { fields, set, clearAll } = useNumericFields<Tier1CostKey>(EMPTY, COST_SPECS)
-  const [engineersRaw, setEngineersRaw] = useState('')
-  const [loadedCostRaw, setLoadedCostRaw] = useState('')
-
-  const costs = useMemo(() => {
-    const out = {} as Tier1Costs
-    TIER1_COST_CATEGORIES.forEach((c) => {
-      out[c.key] = fields[c.key].value
-    })
-    return out
-  }, [fields])
-
-  const result = useMemo(() => tier1Margin(costs), [costs])
+export function Tier1MarginCalculator({ scenario }: { scenario: Tier1Scenario }) {
+  const {
+    fields,
+    set,
+    clearAll,
+    costs,
+    result,
+    engineersRaw,
+    setEngineersRaw,
+    loadedCostRaw,
+    setLoadedCostRaw,
+  } = scenario
 
   const engineers = parseNumeric(engineersRaw, { min: 0, max: COMPANY.engineering.total })
   const loadedCost = parseNumeric(loadedCostRaw, SPEC.money)
@@ -241,6 +231,28 @@ export function Tier1MarginCalculator() {
 
           <MarginWaterfall result={result} costs={costs} />
 
+          <Interpretation
+            verdict={t1Verdict(result)}
+            headline={t1Headline(result)}
+            rules={[
+              {
+                when: `CM ≥ ${SIGNAL_THRESHOLDS.t1MarginStrongPct}%`,
+                then: 'Tier-1 investment thesis strengthens. The engineering dependency is being paid for.',
+              },
+              {
+                when: `CM ${SIGNAL_THRESHOLDS.t1MarginWeakPct}–${SIGNAL_THRESHOLDS.t1MarginStrongPct}%`,
+                then: 'Hold the allocation and tighten the customisation gate before adding enterprise logos.',
+              },
+              {
+                when: `CM < ${SIGNAL_THRESHOLDS.t1MarginWeakPct}%`,
+                then: 'Constrain customisation, reprice, or reduce the allocation. Feeds the LESS TIER 1 side of the gates.',
+              },
+            ]}
+          >
+            Thresholds are pre-committed decision rules chosen in advance, not external benchmarks and
+            not company measurements. Every figure here depends on the cost assumptions you entered.
+          </Interpretation>
+
           <div className="hairline pt-3">
             <span className="eyebrow mb-1.5 flex items-center">
               Against external gross-margin benchmarks
@@ -311,4 +323,30 @@ function KnownFigure({ label, value, note }: { label: string; value: string; not
       </div>
     </div>
   )
+}
+
+/** Verdict for the Tier-1 interpretation block. Ceiling states are never a verdict. */
+function t1Verdict(result: { isCeiling: boolean; contributionMarginPct: number }): Verdict {
+  if (result.isCeiling) return 'pending'
+  return result.contributionMarginPct >= SIGNAL_THRESHOLDS.t1MarginStrongPct ? 'strengthens' : 'weakens'
+}
+
+function t1Headline(result: {
+  isCeiling: boolean
+  missing: string[]
+  contributionMarginPct: number
+}): string {
+  if (result.isCeiling) {
+    return `Tier-1 fully loaded economics remain unproven — ${result.missing.length} cost ${
+      result.missing.length === 1 ? 'category' : 'categories'
+    } still blank.`
+  }
+  const p = result.contributionMarginPct
+  if (p >= SIGNAL_THRESHOLDS.t1MarginStrongPct) {
+    return `Modelled contribution margin ${p.toFixed(1)}% — Tier-1 investment thesis strengthens.`
+  }
+  if (p >= SIGNAL_THRESHOLDS.t1MarginWeakPct) {
+    return `Modelled contribution margin ${p.toFixed(1)}% — below the ${SIGNAL_THRESHOLDS.t1MarginStrongPct}% threshold. Hold and gate customisation.`
+  }
+  return `Modelled contribution margin ${p.toFixed(1)}% — constrain customisation, reprice, or reduce allocation.`
 }

@@ -1,7 +1,9 @@
-# Engineering Capital Allocation — Board Dashboard
+# Capital Allocation & Scaling Operating System
 
-Interactive, executive-facing dashboard and scenario calculator supporting a recommendation on
-where next year's engineering and product investment goes across three customer/product tiers.
+An interactive, executive-facing management system behind a recommendation on where next year's
+engineering and product investment goes across three customer/product tiers. It is built to be
+operated, not read: the calculator feeds the decision gates, and the gates report which way the
+modelled evidence points.
 
 **Thesis:** Protect Tier 1. Fix and scale Tier 2. Automate and instrument Tier 3.
 **Recommended allocation:** Tier 1 Enterprise 30% · Tier 2 Mid-Market 55% · Tier 3 Self-Serve 15%.
@@ -51,13 +53,35 @@ npm --prefix dashboard ci      # installCommand
 npm --prefix dashboard run build   # buildCommand -> dashboard/dist
 ```
 
-## What it answers
+## Three layers
 
-1. Where is the money today?
-2. What does that revenue actually cost us?
-3. Where are engineering and operational resources getting trapped?
-4. Which tier offers the strongest repeatable, scalable long-term value?
-5. Where should the next engineering dollar go — and what evidence would change that?
+| Layer | Question it settles | Sections |
+|---|---|---|
+| **1 — What we see today** | Where the money is, what it costs, where capacity goes | Money & cost · Blind-spot inputs · Tier scorecard · Where engineering leverage breaks |
+| **2 — What the reporting misses** | Why the allocation argument has been unresolvable | What the current reporting misses · Customer growth lifecycle |
+| **3 — How the allocation changes** | What would move capital, and when we'd know | Scenario calculator · Decision gates · Framework · GTM spine · 90-day proof plan |
+
+## The five questions it answers in under two minutes
+
+1. What is the current investment recommendation?
+2. Why does each tier get that allocation?
+3. What is the hidden flaw in the current reporting?
+4. What data would make us change the allocation?
+5. How will we know within 90 days whether the thesis is right?
+
+## Live decision gates
+
+Five gates — MORE / LESS Tier 1, Tier 2 and Tier 3 — read directly from the scenario calculator.
+Each condition reports one of four states, and the distinction is the point:
+
+- **supports** / **argues against** — the modelled scenario points that way
+- **awaiting input** — the calculator could answer it, but a field is blank
+- **not modellable here** — it needs evidence no input can supply, and the gate names the instrument
+
+Gates never move the allocation on their own. When a tier's gates fire in both directions the
+banner says the signals conflict, which is an argument for holding and waiting for the
+instrumentation rather than for moving capital. Thresholds live in `src/lib/signals.ts` as
+pre-committed decision rules — not external benchmarks, and not company measurements.
 
 ## Data integrity
 

@@ -12,7 +12,7 @@ export function DecisionFramework() {
   return (
     <Section
       id="framework"
-      eyebrow="Repeatable decision framework"
+      eyebrow="Layer 3 · How the allocation changes"
       title="One frame, three tiers"
       lede="Signal → Diagnosis → Investment → Operating change → KPI → Kill switch. Applied the same way to each tier, so the comparison is structural rather than rhetorical."
       aside={<Tag kind="calc" label="Analysis" />}

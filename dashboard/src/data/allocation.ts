@@ -21,8 +21,8 @@ export const THESIS = {
 
 export const ALLOCATION_RATIONALE: Record<TierId, string> = {
   t1: 'Protect $22M and 114% NRR; buy down per-customer engineering dependency behind a customisation gate.',
-  t2: 'One platform fix reaches 140 customers today and every customer added after. Highest leverage per engineering dollar.',
-  t3: 'Guardrails, quotas and alert routing. Cheapest available operational relief, and the funnel stays measurable.',
+  t2: 'One platform fix reaches 140 customers today and every customer added after. The leading scaling thesis.',
+  t3: 'Guardrails, quotas and alert routing. Automated controls that apply to every key at once, and the funnel stays measurable.',
 }
 
 /** Staffing pools available for the scenario translation. */

@@ -15,19 +15,21 @@ export interface GateTrigger {
   measuredBy: string
   /** Day by which the instrument is expected to report. */
   by: string
-  /** true when today's packet already contains the evidence for this trigger. */
-  alreadyObserved?: boolean
 }
 
 export interface DecisionGate {
   id: string
   direction: string
   tier: TierId
+  /** 'more' widens the tier's allocation, 'less' narrows it. */
+  move: 'more' | 'less'
   summary: string
   triggers: GateTrigger[]
   /** Allocation this recommendation pre-commits to if the gate fires. Sums to 100. */
   response: Record<TierId, number>
   responseNote: string
+  /** Shown when the modelled scenario is actively arguing for this direction. */
+  signalLine: string
 }
 
 /**
@@ -47,130 +49,163 @@ export const DECISION_GATES: DecisionGate[] = [
     id: 'more-t1',
     direction: 'MORE TIER 1',
     tier: 't1',
-    summary: 'Enterprise economics survive full loading, or the bespoke work stops being bespoke.',
+    move: 'more',
+    summary: 'Enterprise economics survive full loading, or the custom work stops being custom.',
+    signalLine: 'Supports increasing Tier 1 investment',
     triggers: [
       {
-        id: 'g1a',
-        text: 'Fully loaded Tier-1 contribution margin stays strong after engineering, SRE, QA, support and implementation cost',
+        id: 't1-margin-strong',
+        text: 'Fully loaded Tier-1 contribution margin remains strong after engineering, SRE, QA, support and implementation cost',
         measuredBy: 'Contribution-margin model, all 18 accounts',
         by: 'Day 30',
       },
       {
-        id: 'g1b',
-        text: 'The three accounts consuming 68% of velocity economically justify that consumption',
+        id: 't1-engineering-justified',
+        text: 'Engineering-heavy accounts economically justify their resource consumption',
         measuredBy: 'Engineering hours tagged by account × margin per account',
         by: 'Day 30',
       },
       {
-        id: 'g1c',
-        text: 'Bespoke work becomes reusable or productised across three or more enterprise accounts',
+        id: 't1-reusable',
+        text: 'Custom work becomes reusable or productised across three or more enterprise accounts',
         measuredBy: 'Customisation gate reuse rate',
         by: 'Day 60',
       },
       {
-        id: 'g1d',
-        text: 'Tier-2 infrastructure cost per customer exceeds $6K at 200 customers — multi-tenant leverage is weaker than assumed',
-        measuredBy: 'Cost-per-customer curve modelled to 200 customers',
-        by: 'Day 60',
+        id: 't1-no-proportional-dependency',
+        text: 'Additional enterprise logos do not create proportional engineering dependency',
+        measuredBy: 'Engineering hours per account across new enterprise logos',
+        by: 'Day 90',
       },
     ],
     response: { t1: 45, t2: 40, t3: 15 },
-    responseNote: 'Multi-tenant leverage thesis weakens; capital returns to the tier that holds the revenue.',
+    responseNote: 'Enterprise economics hold under full loading; capital returns to the tier that holds the revenue.',
   },
   {
     id: 'more-t2',
     direction: 'MORE TIER 2',
     tier: 't2',
+    move: 'more',
     summary: 'The platform fix converts into customer outcomes and the cost curve stays flat.',
+    signalLine: 'Supports increasing Tier 2 investment',
     triggers: [
       {
-        id: 'g2a',
-        text: 'Availability moves toward 99.9% after rate limiting and peak capacity ship',
+        id: 't2-availability',
+        text: 'Availability moves toward 99.9%',
         measuredBy: 'Availability by hour, measured weekly',
         by: 'Day 60',
       },
       {
-        id: 'g2b',
-        text: 'Logo churn declines materially from 16% toward the 5–10% benchmark band',
+        id: 't2-churn-improves',
+        text: 'Churn declines after reliability improves',
         measuredBy: 'Coded churn-reason analysis + cohort retention',
         by: 'Day 90',
       },
       {
-        id: 'g2c',
-        text: 'Infrastructure cost stays leveraged as customer count grows',
-        measuredBy: 'Infra cost per customer at 200 customers',
+        id: 't2-infra-leveraged',
+        text: 'Infrastructure cost per customer remains leveraged as customer count grows',
+        measuredBy: 'Infra cost per customer modelled to 200 customers',
         by: 'Day 60',
       },
       {
-        id: 'g2d',
-        text: 'Tier-2 customers expand without proportional engineering growth',
+        id: 't2-expansion-without-engineering',
+        text: 'Customer expansion does not require proportional engineering growth',
         measuredBy: 'NRR vs engineering hours per Tier-2 customer',
         by: 'Day 90',
-      },
-      {
-        id: 'g2e',
-        text: 'Tier-1 fully loaded margin per ARR dollar comes back below Tier 2',
-        measuredBy: 'Contribution-margin model by tier',
-        by: 'Day 30',
       },
     ],
     response: { t1: 20, t2: 65, t3: 15 },
     responseNote: 'The scaling engine is confirmed; Tier 1 holds at protection level only.',
   },
   {
-    id: 'less-t3',
-    direction: 'LESS TIER 3',
-    tier: 't3',
-    summary: 'The funnel does not exist, or the controls do not work.',
+    id: 'less-t2',
+    direction: 'LESS TIER 2',
+    tier: 't2',
+    move: 'less',
+    summary: 'The reliability thesis fails its own test, or the architecture is not as leveraged as assumed.',
+    signalLine: 'Tier 2 thesis requires reassessment',
     triggers: [
       {
-        id: 'g3a',
-        text: 'Cohort conversion into Tier 2 is weak against the 2–6% external PLG range',
-        measuredBy: 'Historical cohort denominators across all 14 monthly cohorts',
+        id: 't2-reliability-without-churn',
+        text: 'Reliability improves but churn does not',
+        measuredBy: 'Availability by hour + coded churn-reason analysis',
+        by: 'Day 90',
+      },
+      {
+        id: 't2-infra-linear',
+        text: 'Infrastructure cost scales linearly with customer growth',
+        measuredBy: 'Cost-per-customer curve with cluster capacity priced',
+        by: 'Day 60',
+      },
+      {
+        id: 't2-disproportionate-capacity',
+        text: 'Supporting 300 customers requires disproportionate SRE or engineering capacity',
+        measuredBy: 'SRE and engineering hours per customer at the target count',
+        by: 'Day 90',
+      },
+    ],
+    response: { t1: 40, t2: 45, t3: 15 },
+    responseNote:
+      'The constraint was not reliability or the architecture is not leveraged. Capital moves to protection and to product work on fit, pricing and onboarding.',
+  },
+  {
+    id: 'more-t3',
+    direction: 'MORE TIER 3',
+    tier: 't3',
+    move: 'more',
+    summary: 'The sandbox is an acquisition engine with a measurable downstream return.',
+    signalLine: 'Supports increasing Tier 3 funnel investment',
+    triggers: [
+      {
+        id: 't3-conversion-strong',
+        text: 'Cohort conversion into Tier 2 is strong against the external 2–6% PLG range',
+        measuredBy: 'Cohort conversion with a real historical denominator',
         by: 'Day 30',
       },
       {
-        id: 'g3b',
-        text: 'Tier-3-originated customers retain or expand below the Tier-2 average',
+        id: 't3-retention-strong',
+        text: 'Tier-3-originated Tier-2 customers retain and expand well',
         measuredBy: 'Downstream retention / NRR by origin',
         by: 'Day 60',
       },
       {
-        id: 'g3c',
-        text: 'SRE burden stays high after rate limiting, quotas and alert routing ship',
+        id: 't3-alerts-drop',
+        text: 'Alert burden drops materially after guardrails',
+        measuredBy: 'Alert volume and SRE hours, before vs after',
+        by: 'Day 60',
+      },
+    ],
+    response: { t1: 20, t2: 55, t3: 25 },
+    responseNote: 'Acquisition economics are proven; the channel is funded from enterprise protection.',
+  },
+  {
+    id: 'less-t3',
+    direction: 'LESS TIER 3',
+    tier: 't3',
+    move: 'less',
+    summary: 'The funnel does not exist, or the controls do not work.',
+    signalLine: 'Supports restricting Tier 3',
+    triggers: [
+      {
+        id: 't3-conversion-weak',
+        text: 'Cohort conversion into Tier 2 is weak',
+        measuredBy: 'Historical cohort denominators across all 14 monthly cohorts',
+        by: 'Day 30',
+      },
+      {
+        id: 't3-retention-weak',
+        text: 'Downstream retention of Tier-3-originated customers is poor',
+        measuredBy: 'Downstream retention / NRR by origin',
+        by: 'Day 60',
+      },
+      {
+        id: 't3-burden-persists',
+        text: 'SRE burden remains high after automation',
         measuredBy: 'Alert volume and SRE hours consumed, before vs after',
         by: 'Day 60',
       },
     ],
     response: { t1: 30, t2: 65, t3: 5 },
     responseNote: 'Channel is restricted to invited developers; freed capital goes to the scaling engine.',
-  },
-  {
-    id: 'more-t3',
-    direction: 'MORE TIER 3',
-    tier: 't3',
-    summary: 'The sandbox is an acquisition engine with a measurable downstream return.',
-    triggers: [
-      {
-        id: 'g4a',
-        text: 'Tier-3-originated customers show strong downstream retention / NRR versus the Tier-2 average',
-        measuredBy: 'Downstream retention / NRR by origin',
-        by: 'Day 60',
-      },
-      {
-        id: 'g4b',
-        text: 'Cohort conversion compares favourably with the 2–6% external PLG range',
-        measuredBy: 'Cohort conversion with a real historical denominator',
-        by: 'Day 30',
-      },
-      {
-        id: 'g4c',
-        text: 'Alert volume falls materially after guardrails, freeing SRE capacity',
-        measuredBy: 'Alert volume reduction vs the 52% baseline share',
-        by: 'Day 60',
-      },
-    ],
-    response: { t1: 20, t2: 55, t3: 25 },
-    responseNote: 'Acquisition economics are proven; the channel is funded from enterprise protection.',
   },
 ]

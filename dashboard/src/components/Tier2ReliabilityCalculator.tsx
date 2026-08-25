@@ -1,10 +1,9 @@
-import { useMemo } from 'react'
 import { BENCHMARKS, availabilityVerdict, churnVerdict } from '@/data/benchmarks'
 import { TIERS, TIER_DETAIL } from '@/data/caseFacts'
-import { derivedAvgArr, tier2Reliability } from '@/lib/calc'
 import { hours, hoursHuman, num, pct, usd, usdExact } from '@/lib/format'
-import { SPEC } from '@/lib/validation'
-import { useNumericFields } from '@/hooks/useNumericFields'
+import { SIGNAL_THRESHOLDS } from '@/lib/signals'
+import { T2_DERIVED_AVG_ARR, type Tier2Scenario } from '@/hooks/useScenario'
+import { Interpretation, type Verdict } from './ui/Interpretation'
 import { DowntimeChart } from './charts/DowntimeChart'
 import { BenchmarkScale } from './ui/BenchmarkScale'
 import { Card, Note, Stat, StatusDot } from './ui/Card'
@@ -13,34 +12,8 @@ import { PanelHeader } from './ui/PanelHeader'
 import { DataNeeded, Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
 
-type Key =
-  | 'targetChurn'
-  | 'targetAvailability'
-  | 'netNewCustomers'
-  | 'infraCostGrowth'
-  | 'engInvestment'
-  | 'avgArr'
-
 const T2 = TIERS.t2
-const DERIVED_AVG_ARR = Math.round(derivedAvgArr('t2'))
-
-const INITIAL: Record<Key, string> = {
-  targetChurn: '10',
-  targetAvailability: '99.9',
-  netNewCustomers: '0',
-  infraCostGrowth: '0',
-  engInvestment: '',
-  avgArr: String(DERIVED_AVG_ARR),
-}
-
-const SPECS: Record<Key, (typeof SPEC)[keyof typeof SPEC]> = {
-  targetChurn: SPEC.rate,
-  targetAvailability: SPEC.availability,
-  netNewCustomers: SPEC.netCustomers,
-  infraCostGrowth: SPEC.growth,
-  engInvestment: SPEC.money,
-  avgArr: SPEC.money,
-}
+const DERIVED_AVG_ARR = T2_DERIVED_AVG_ARR
 
 /**
  * C. Tier-2 reliability and retention.
@@ -48,25 +21,12 @@ const SPECS: Record<Key, (typeof SPEC)[keyof typeof SPEC]> = {
  * not model a causal link from availability to churn — that link is the
  * hypothesis this investment is designed to test.
  */
-export function Tier2ReliabilityCalculator() {
-  const { fields, set, resetAll } = useNumericFields<Key>(INITIAL, SPECS)
+export function Tier2ReliabilityCalculator({ scenario }: { scenario: Tier2Scenario }) {
+  const { fields, set, resetAll, result } = scenario
 
   const targetChurn = fields.targetChurn.value
   const targetAvailability = fields.targetAvailability.value
   const avgArr = fields.avgArr.value
-
-  const result = useMemo(
-    () =>
-      tier2Reliability({
-        targetChurnPct: targetChurn ?? (T2.logoChurn ?? 0) * 100,
-        targetAvailabilityPct: targetAvailability ?? (T2.availability ?? 0),
-        netNewCustomers: fields.netNewCustomers.value ?? 0,
-        infraCostGrowthPct: fields.infraCostGrowth.value ?? 0,
-        additionalEngInvestment: fields.engInvestment.value,
-        avgArr: avgArr ?? DERIVED_AVG_ARR,
-      }),
-    [targetChurn, targetAvailability, avgArr, fields.netNewCustomers.value, fields.infraCostGrowth.value, fields.engInvestment.value],
-  )
 
   const churnEntered = targetChurn !== null
   const availEntered = targetAvailability !== null
@@ -127,11 +87,11 @@ export function Tier2ReliabilityCalculator() {
                   hint="Common production SaaS/API baseline is ~99.9%. 99.95% stronger, 99.99% mission-critical."
                 />
                 <NumericField
-                  label="Net new customers"
-                  raw={fields.netNewCustomers.raw}
-                  error={fields.netNewCustomers.error}
-                  onChange={(v) => set('netNewCustomers', v)}
-                  hint="Net of churn. Used to show the retention gain at the larger base."
+                  label="Projected customer count"
+                  raw={fields.projectedCustomers.raw}
+                  error={fields.projectedCustomers.error}
+                  onChange={(v) => set('projectedCustomers', v)}
+                  hint={`Absolute customer count modelled for the coming year, net of churn. ${T2.accounts} today. Drives the infrastructure leverage test.`}
                 />
                 <NumericField
                   label="Infrastructure cost growth"
@@ -239,7 +199,7 @@ export function Tier2ReliabilityCalculator() {
                   {T2.accounts} customers, not {Math.round(result.logosRetained)} identifiable accounts,
                   and it assumes churning customers are average-sized. Churn improvement is the
                   assumption; the ARR figure is only what that assumption would be worth.
-                  {fields.netNewCustomers.value !== null && fields.netNewCustomers.value !== 0 && (
+                  {result.projectedCustomers !== result.baseCustomers && (
                     <>
                       {' '}
                       At the projected base of {num(result.projectedCustomers)} customers the same
@@ -293,33 +253,72 @@ export function Tier2ReliabilityCalculator() {
               </>
             )}
 
-            <div className="hairline grid grid-cols-2 gap-3 pt-3 sm:grid-cols-3">
+            <div className="hairline grid grid-cols-2 gap-3 pt-3 sm:grid-cols-4">
               <Stat
-                label="Hosting per customer"
-                value={usd(result.projectedHostingPerCustomer, { decimals: 1 })}
+                label="Infra cost per customer"
+                value={usd(result.projectedHostingPerCustomer)}
                 size="sm"
                 sub={
                   result.projectedHostingPerCustomer === result.currentHostingPerCustomer
                     ? 'Unchanged from today'
                     : `from ${usd(result.currentHostingPerCustomer)} today`
                 }
+                tone={
+                  result.projectedHostingPerCustomer > SIGNAL_THRESHOLDS.t2InfraPerCustomerCeiling
+                    ? 'var(--bad)'
+                    : undefined
+                }
                 tag={<Tag kind="calc" />}
               />
               <Stat
-                label="Projected hosting total"
+                label="Projected infra total"
                 value={usd(result.projectedHostingTotal)}
                 size="sm"
                 sub={`${num(result.projectedCustomers)} customers, linear scaling assumed`}
                 tag={<Tag kind="calc" />}
               />
               <Stat
-                label="Cost per customer at 200"
+                label="Infra as % of ARR"
+                value={pct(result.projectedHostingPctOfArr)}
+                size="sm"
+                sub={`from ${pct(result.currentHostingPctOfArr)} today — the leverage test`}
+                tone={
+                  result.projectedHostingPctOfArr > result.currentHostingPctOfArr
+                    ? 'var(--watch)'
+                    : 'var(--good)'
+                }
+                tag={<Tag kind="calc" />}
+              />
+              <Stat
+                label={`Cost per customer at ${SIGNAL_THRESHOLDS.t2ScaleCheckpointCustomers}`}
                 value={<DataNeeded what="cluster capacity cost curve above ~200 customers" />}
                 size="sm"
                 sub="Linear per-customer cost is a floor, not an estimate"
                 tag={<Tag kind="needed" />}
               />
             </div>
+
+            <Interpretation
+              verdict={t2Verdict(targetChurn, targetAvailability, result)}
+              headline={t2Headline(targetChurn, targetAvailability, result)}
+              rules={[
+                {
+                  when: 'Availability ↑ + churn ↓ + infra leverage holds',
+                  then: 'Scale thesis strengthens. Tier 2 keeps or increases the majority allocation.',
+                },
+                {
+                  when: 'Availability ↑ + churn flat',
+                  then: 'Reliability thesis weakened. Churn is fit, pricing or onboarding — capital shifts from platform to product.',
+                },
+                {
+                  when: `Infra per customer > ${usd(SIGNAL_THRESHOLDS.t2InfraPerCustomerCeiling)}`,
+                  then: 'Multi-tenant leverage thesis weakened. Feeds the LESS TIER 2 gate.',
+                },
+              ]}
+            >
+              Reliability improving churn is the assumption under test, not a finding. This block reads
+              the scenario you entered and states which way it points.
+            </Interpretation>
 
             <p className="text-[10.5px] leading-snug" style={{ color: 'var(--muted)' }}>
               Churn status today:{' '}
@@ -352,4 +351,47 @@ function Known({ label, value }: { label: string; value: string }) {
       </div>
     </div>
   )
+}
+
+/* -------------------------------------------------------------------------- */
+
+const CURRENT_CHURN = (TIERS.t2.logoChurn ?? 0) * 100
+
+function reliabilityFixed(availability: number | null): boolean {
+  return availability !== null && availability >= SIGNAL_THRESHOLDS.t2BaselineAvailability
+}
+
+function leverageHolds(result: { projectedHostingPerCustomer: number }): boolean {
+  return result.projectedHostingPerCustomer <= SIGNAL_THRESHOLDS.t2InfraPerCustomerCeiling
+}
+
+function t2Verdict(
+  churn: number | null,
+  availability: number | null,
+  result: { projectedHostingPerCustomer: number },
+): Verdict {
+  if (churn === null || availability === null) return 'pending'
+  if (!leverageHolds(result)) return 'weakens'
+  if (!reliabilityFixed(availability)) return 'pending'
+  return churn < CURRENT_CHURN ? 'strengthens' : 'weakens'
+}
+
+function t2Headline(
+  churn: number | null,
+  availability: number | null,
+  result: { projectedHostingPerCustomer: number; projectedCustomers: number; projectedHostingPctOfArr: number },
+): string {
+  if (churn === null || availability === null) {
+    return 'Enter a target churn and target availability to read the scale thesis.'
+  }
+  if (!leverageHolds(result)) {
+    return `Modelled infra cost ${usd(result.projectedHostingPerCustomer)} per customer at ${result.projectedCustomers} customers — multi-tenant leverage thesis weakened.`
+  }
+  if (!reliabilityFixed(availability)) {
+    return `Modelled target ${availability}% stays below the ${SIGNAL_THRESHOLDS.t2BaselineAvailability}% baseline — the reliability fix is not yet modelled as delivered.`
+  }
+  if (churn < CURRENT_CHURN) {
+    return `Modelled: ${availability}% availability with churn ${CURRENT_CHURN.toFixed(0)}% → ${churn}% at ${pct(result.projectedHostingPctOfArr)} infra — scale thesis strengthens.`
+  }
+  return `Modelled: availability reaches ${availability}% and churn stays at ${churn}% — reliability thesis weakened, re-test before adding capital.`
 }

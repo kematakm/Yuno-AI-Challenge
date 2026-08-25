@@ -1,4 +1,5 @@
 import { useAllocation } from '@/hooks/useAllocation'
+import { useScenario } from '@/hooks/useScenario'
 import { CustomerLifecycleFunnel } from '@/components/CustomerLifecycleFunnel'
 import { DecisionFramework } from '@/components/DecisionFramework'
 import { DecisionGates } from '@/components/DecisionGates'
@@ -9,6 +10,7 @@ import { FiveQuestions } from '@/components/FiveQuestions'
 import { GTMOperatingModel } from '@/components/GTMOperatingModel'
 import { LifecycleVisual } from '@/components/LifecycleVisual'
 import { NinetyDayPlan } from '@/components/NinetyDayPlan'
+import { ReportingBlindSpots } from '@/components/ReportingBlindSpots'
 import { ScenarioCalculator } from '@/components/ScenarioCalculator'
 import { TierScorecard } from '@/components/TierScorecard'
 import { WhereTheMoneyIs } from '@/components/WhereTheMoneyIs'
@@ -17,8 +19,9 @@ import { Tag } from '@/components/ui/Tag'
 
 const NAV = [
   { id: 'money', label: 'Money & cost' },
+  { id: 'blindspots', label: 'Blind spots' },
   { id: 'scorecard', label: 'Scorecard' },
-  { id: 'trapped', label: 'Capacity trap' },
+  { id: 'trapped', label: 'Leverage breaks' },
   { id: 'funnel', label: 'Funnel' },
   { id: 'calculator', label: 'Calculator' },
   { id: 'gates', label: 'Decision gates' },
@@ -29,6 +32,7 @@ const NAV = [
 
 export default function App() {
   const allocation = useAllocation()
+  const scenario = useScenario()
 
   return (
     <div className="min-h-screen">
@@ -45,12 +49,13 @@ export default function App() {
 
         <div className="grid min-w-0 gap-10">
           <WhereTheMoneyIs />
+          <ReportingBlindSpots />
           <TierScorecard allocation={allocation.allocation} />
           <EngineeringLeverageCards />
           <CustomerLifecycleFunnel />
           <ExecPositions />
-          <ScenarioCalculator allocation={allocation} />
-          <DecisionGates allocation={allocation} />
+          <ScenarioCalculator allocation={allocation} scenario={scenario} />
+          <DecisionGates allocation={allocation} scenario={scenario} />
           <DecisionFramework />
           <GTMOperatingModel />
 
@@ -111,10 +116,10 @@ function IntegrityFooter() {
     'No missing company data is invented. Unmeasured values render as “Data Needed”, never as zero.',
     'External benchmarks are labelled as such and are never used to impute a company figure.',
     '22 ÷ 1,200 is not presented as a conversion rate. Nor is 22 ÷ 140.',
-    '22 ÷ 140 ≈ 15.7% is stated only as the share of the current Tier-2 base that originated in Tier 3.',
-    'Tier-2 reliability is not claimed to cause Tier-2 churn. It is labelled a hypothesis to test.',
-    'Tier 1 is not assumed unprofitable, and Tier 2 is not assumed more profitable, until fully loaded cost exists.',
-    'Tier 3 is not assumed to deserve permanent funding. Its survival depends on cohort economics after guardrails.',
+    '15.7% is stated only as the share of the current Tier-2 base that originated in Tier 3 — never as a conversion rate.',
+    'Reliability is presented as a testable churn hypothesis, never as an established cause.',
+    'Tier-1 fully loaded economics remain unproven; Tier 2 is stated as the leading scaling thesis, not the proven best business.',
+    'Tier-3 compute is described as negligible in the packet; full operational cost remains unmeasured.',
     'Calculated and observed values are visually distinguished everywhere they appear.',
     'Every scenario output carries an “Illustrative”, “Modelled”, “Scenario” or “Ceiling” label.',
   ]

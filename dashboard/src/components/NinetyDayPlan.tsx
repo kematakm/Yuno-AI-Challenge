@@ -12,8 +12,8 @@ export function NinetyDayPlan() {
   return (
     <Section
       id="plan"
-      eyebrow="Execution"
-      title="90 days: instrument, fix, prove"
+      eyebrow="Layer 3 · How the allocation changes"
+      title="90-day proof plan"
       lede="The allocation is confirmed or revised in writing at day 90. Everything in the first window exists to replace an argument with a measurement."
       aside={<Tag kind="calc" label="Plan" />}
     >

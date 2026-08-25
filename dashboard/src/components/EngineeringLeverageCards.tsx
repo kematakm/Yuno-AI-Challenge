@@ -36,8 +36,8 @@ export function EngineeringLeverageCards() {
   return (
     <Section
       id="trapped"
-      eyebrow="Questions 3 & 4"
-      title="The engineering capacity trap"
+      eyebrow="Layer 1 · What we see today"
+      title="Where engineering leverage breaks"
       lede="Each tier consumes engineering differently. The difference is not how much work there is — it is how far one unit of that work travels."
       aside={<Tag kind="fact" label="Case facts + stated flows" />}
     >
@@ -167,8 +167,8 @@ export function EngineeringLeverageCards() {
           {TIER_DETAIL.t1.velocityAccounts} of {TIERS.t1.accounts} Tier-1 customers over the last two
           quarters, and none of it amortises across the other {TIERS.t1.accounts - TIER_DETAIL.t1.velocityAccounts}.
           Tier 2’s constraint is one shared cluster serving {TIERS.t2.accounts} customers — the same fix,
-          once. That is why the incremental dollar moves, not because Tier 1 is unprofitable. Nobody has
-          measured whether it is.
+          once. That asymmetry is why the incremental dollar moves. Tier-1 fully loaded economics
+          remain unproven in either direction — nobody has measured them.
         </p>
       </div>
     </Section>

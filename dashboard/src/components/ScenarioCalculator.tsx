@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { RECOMMENDED_ALLOCATION, STAFF_POOLS, type StaffPoolId } from '@/data/allocation'
+import { RECOMMENDED_ALLOCATION, STAFF_POOLS, THESIS, type StaffPoolId } from '@/data/allocation'
 import { COMPANY, TIER_LIST } from '@/data/caseFacts'
 import type { TierId } from '@/data/types'
 import { allocationToFte } from '@/lib/calc'
 import { clamp, parseNumeric, SPEC } from '@/lib/validation'
 import type { AllocationState } from '@/hooks/useAllocation'
+import type { Scenario } from '@/hooks/useScenario'
 import { AllocationChart } from './AllocationChart'
 import { Tier1MarginCalculator } from './Tier1MarginCalculator'
 import { Tier2ReliabilityCalculator } from './Tier2ReliabilityCalculator'
@@ -15,11 +16,17 @@ import { SliderRow, ToggleGroup } from './ui/Field'
 import { Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
 
-export function ScenarioCalculator({ allocation }: { allocation: AllocationState }) {
+export function ScenarioCalculator({
+  allocation,
+  scenario,
+}: {
+  allocation: AllocationState
+  scenario: Scenario
+}) {
   return (
     <Section
       id="calculator"
-      eyebrow="Scenario calculator"
+      eyebrow="Layer 3 · How the allocation changes"
       title="Challenge the assumptions"
       lede="Nothing below is pre-filled with company data that does not exist. Enter your own assumptions and the outputs recalculate; leave them blank and the dashboard says so rather than showing a zero."
       aside={
@@ -57,9 +64,9 @@ export function ScenarioCalculator({ allocation }: { allocation: AllocationState
         </div>
 
         <AllocationPanel state={allocation} />
-        <Tier1MarginCalculator />
-        <Tier2ReliabilityCalculator />
-        <Tier3FunnelCalculator />
+        <Tier1MarginCalculator scenario={scenario.t1} />
+        <Tier2ReliabilityCalculator scenario={scenario.t2} />
+        <Tier3FunnelCalculator scenario={scenario.t3} />
       </div>
     </Section>
   )
@@ -87,8 +94,8 @@ function AllocationPanel({ state }: { state: AllocationState }) {
     <Card padded={false}>
       <PanelHeader
         letter="A"
-        title="Engineering allocation"
-        subtitle="Must total 100%. Auto-rebalance keeps it there; switch it off to see the validation instead."
+        title="Current capital allocation thesis"
+        subtitle="This is the current recommendation based on available evidence, not a permanent allocation. Must total 100%; auto-rebalance keeps it there."
         right={
           <div className="flex flex-wrap items-center gap-1.5">
             <button
@@ -110,6 +117,17 @@ function AllocationPanel({ state }: { state: AllocationState }) {
 
       <div className="grid gap-5 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="grid content-start gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center gap-2 rounded-[4px] px-2.5 py-1.5 text-[11px] font-semibold tracking-[0.04em]"
+              style={{ background: 'var(--t2)', color: 'var(--on-t2)' }}
+            >
+              <span className="opacity-75">FORK SELECTED</span>
+              <span className="h-3 w-px" style={{ background: 'currentColor', opacity: 0.35 }} />
+              {THESIS.badge}
+            </span>
+          </div>
+
           {/* The logic, before anyone touches a slider. */}
           <div className="grid grid-cols-3 gap-2">
             {TIER_LIST.map((t) => {

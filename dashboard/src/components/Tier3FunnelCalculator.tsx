@@ -1,11 +1,11 @@
-import { useMemo } from 'react'
 import { RECOMMENDED_ALLOCATION } from '@/data/allocation'
 import { BENCHMARKS } from '@/data/benchmarks'
 import { COMPANY, TIERS, TIER_DETAIL } from '@/data/caseFacts'
-import { derivedAvgArr, sreFteEquivalent, tier3Funnel, tier3OriginShareOfTier2Base } from '@/lib/calc'
+import { sreFteEquivalent, tier3OriginShareOfTier2Base } from '@/lib/calc'
 import { num, pct, usd, usdExact } from '@/lib/format'
-import { SPEC } from '@/lib/validation'
-import { useNumericFields } from '@/hooks/useNumericFields'
+import { SIGNAL_THRESHOLDS } from '@/lib/signals'
+import { T2_DERIVED_AVG_ARR, type Tier3Scenario } from '@/hooks/useScenario'
+import { Interpretation, type Verdict } from './ui/Interpretation'
 import { AlertShareChart } from './charts/AlertShareChart'
 import { BenchmarkScale } from './ui/BenchmarkScale'
 import { Card, Note, Stat } from './ui/Card'
@@ -14,40 +14,8 @@ import { PanelHeader } from './ui/PanelHeader'
 import { DataNeeded, Tag } from './ui/Tag'
 import { Info } from './ui/Tooltip'
 
-type Key =
-  | 'cohortSize'
-  | 'conversionRate'
-  | 'alertReduction'
-  | 'avgArrAfterGraduation'
-  | 'downstreamNrr'
-  | 'totalMonthlyAlerts'
-  | 'sreHoursPerAlert'
-  | 'sreCostPerHour'
-
 const T3 = TIERS.t3
-const DERIVED_T2_AVG_ARR = Math.round(derivedAvgArr('t2'))
-
-const INITIAL: Record<Key, string> = {
-  cohortSize: '', // never measured — must stay blank
-  conversionRate: '', // never measured — must stay blank
-  alertReduction: '60',
-  avgArrAfterGraduation: String(DERIVED_T2_AVG_ARR),
-  downstreamNrr: '',
-  totalMonthlyAlerts: '',
-  sreHoursPerAlert: '',
-  sreCostPerHour: '',
-}
-
-const SPECS: Record<Key, (typeof SPEC)[keyof typeof SPEC]> = {
-  cohortSize: SPEC.count,
-  conversionRate: SPEC.rate,
-  alertReduction: SPEC.rate,
-  avgArrAfterGraduation: SPEC.money,
-  downstreamNrr: { min: 0, max: 400, unitLabel: '%' },
-  totalMonthlyAlerts: SPEC.count,
-  sreHoursPerAlert: SPEC.hoursPerAlert,
-  sreCostPerHour: SPEC.money,
-}
+const DERIVED_T2_AVG_ARR = T2_DERIVED_AVG_ARR
 
 /**
  * D. Tier-3 funnel and SRE burden.
@@ -55,35 +23,9 @@ const SPECS: Record<Key, (typeof SPEC)[keyof typeof SPEC]> = {
  * graduates and no cohort denominator, so no conversion rate is displayed until
  * a user supplies the denominator themselves.
  */
-export function Tier3FunnelCalculator() {
-  const { fields, set, resetAll } = useNumericFields<Key>(INITIAL, SPECS)
-
+export function Tier3FunnelCalculator({ scenario }: { scenario: Tier3Scenario }) {
+  const { fields, set, resetAll, result, cohortEntered } = scenario
   const reduction = fields.alertReduction.value ?? 0
-  const result = useMemo(
-    () =>
-      tier3Funnel({
-        historicalCohortSize: fields.cohortSize.value,
-        modelledConversionPct: fields.conversionRate.value,
-        targetAlertReductionPct: reduction,
-        avgArrAfterGraduation: fields.avgArrAfterGraduation.value ?? DERIVED_T2_AVG_ARR,
-        downstreamNrrPct: fields.downstreamNrr.value,
-        totalMonthlyAlerts: fields.totalMonthlyAlerts.value,
-        sreHoursPerAlert: fields.sreHoursPerAlert.value,
-        sreCostPerHour: fields.sreCostPerHour.value,
-      }),
-    [
-      fields.cohortSize.value,
-      fields.conversionRate.value,
-      reduction,
-      fields.avgArrAfterGraduation.value,
-      fields.downstreamNrr.value,
-      fields.totalMonthlyAlerts.value,
-      fields.sreHoursPerAlert.value,
-      fields.sreCostPerHour.value,
-    ],
-  )
-
-  const cohortEntered = fields.cohortSize.value !== null && fields.cohortSize.value > 0
 
   return (
     <Card padded={false}>
@@ -128,6 +70,14 @@ export function Tier3FunnelCalculator() {
                 onChange={(v) => set('cohortSize', v)}
                 emphasise
                 hint={`Total developers who signed up across the ${TIER_DETAIL.t3.launchedMonthsAgo} months the sandbox has existed and had the opportunity to graduate. This is the denominator the company has never captured. Today's 1,200 active keys are not it.`}
+              />
+              <NumericField
+                label="Measured graduate count"
+                raw={fields.actualGraduates.raw}
+                error={fields.actualGraduates.error}
+                onChange={(v) => set('actualGraduates', v)}
+                placeholder={`Falls back to ${TIER_DETAIL.t3.knownTier2Graduates}`}
+                hint={`The packet's ${TIER_DETAIL.t3.knownTier2Graduates} counts only Tier-3-originated customers still in Tier 2, so it is a floor on total historical graduates. Enter the measured total once the cohort work produces one.`}
               />
               <NumericField
                 label="Modelled Tier-3 → Tier-2 conversion"
@@ -229,12 +179,14 @@ export function Tier3FunnelCalculator() {
                 <>
                   <div className="mb-3 grid grid-cols-2 gap-3">
                     <Stat
-                      label="Observed conversion (lower bound)"
+                      label={
+                        result.graduatesAreFloor ? 'Observed conversion (lower bound)' : 'Observed conversion'
+                      }
                       value={pct(result.observedConversionPct ?? 0, 2)}
                       size="md"
-                      sub={`${TIER_DETAIL.t3.knownTier2Graduates} still-active graduates ÷ ${num(
-                        fields.cohortSize.value ?? 0,
-                      )} cohort`}
+                      sub={`${num(result.graduatesUsed)} ${
+                        result.graduatesAreFloor ? 'still-active graduates (floor)' : 'measured graduates'
+                      } ÷ ${num(fields.cohortSize.value ?? 0)} cohort`}
                       tag={<Tag kind="calc" />}
                     />
                     <Stat
@@ -399,6 +351,28 @@ export function Tier3FunnelCalculator() {
               </div>
             </div>
 
+            <Interpretation
+              verdict={t3Verdict(scenario)}
+              headline={t3Headline(scenario)}
+              rules={[
+                {
+                  when: 'Conversion strong + downstream retention strong + burden falls',
+                  then: 'Increase Tier-3 funnel investment. The channel is an acquisition engine.',
+                },
+                {
+                  when: 'Conversion weak + downstream retention weak + burden persists',
+                  then: 'Restrict or reduce Tier 3 to invited developers. Feeds the LESS TIER 3 gate.',
+                },
+                {
+                  when: 'Cohort denominator blank',
+                  then: 'No conversion reading is possible. Nothing here can decide the channel yet.',
+                },
+              ]}
+            >
+              Tier-3 compute is described as negligible in the packet; full operational cost remains
+              unmeasured. Conversion cannot be read at all until a historical cohort denominator exists.
+            </Interpretation>
+
             <Note>
               <strong style={{ color: 'var(--ink)' }}>
                 What the {RECOMMENDED_ALLOCATION.t3}% buys.
@@ -434,4 +408,54 @@ function Known({ label, value, note }: { label: string; value: string; note: str
       </div>
     </div>
   )
+}
+
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The three legs of the Tier-3 decision: does the funnel convert, do graduates
+ * retain, and does the burden fall. Each leg reads independently, and a blank
+ * denominator means the channel simply cannot be judged yet.
+ */
+function t3Legs(scenario: Tier3Scenario) {
+  const conv = scenario.result.observedConversionPct
+  const nrr = scenario.fields.downstreamNrr.value
+  const reduction = scenario.fields.alertReduction.value
+  const b = BENCHMARKS.plgConversion
+  return {
+    conversion: conv === null ? null : conv >= b.low,
+    retention: nrr === null ? null : nrr >= TIERS.t2.nrr * 100,
+    burden: reduction === null ? null : reduction >= SIGNAL_THRESHOLDS.t3AlertReductionMaterialPct,
+  }
+}
+
+function t3Verdict(scenario: Tier3Scenario): Verdict {
+  const legs = t3Legs(scenario)
+  const known = Object.values(legs).filter((v) => v !== null) as boolean[]
+  if (!scenario.cohortEntered || known.length < 2) return 'pending'
+  const good = known.filter(Boolean).length
+  return good > known.length / 2 ? 'strengthens' : 'weakens'
+}
+
+function t3Headline(scenario: Tier3Scenario): string {
+  const legs = t3Legs(scenario)
+  if (!scenario.cohortEntered) {
+    return 'Conversion cannot be read until a historical cohort denominator is entered.'
+  }
+  const parts: string[] = []
+  parts.push(legs.conversion ? 'conversion at or above the external range' : 'conversion below the external range')
+  if (legs.retention !== null) {
+    parts.push(legs.retention ? 'downstream retention at or above the Tier-2 average' : 'downstream retention below the Tier-2 average')
+  }
+  if (legs.burden !== null) {
+    parts.push(legs.burden ? 'alert burden falling materially' : 'alert burden not falling materially')
+  }
+  const verdict = t3Verdict(scenario)
+  const tail =
+    verdict === 'strengthens'
+      ? 'Increase Tier-3 funnel investment.'
+      : verdict === 'weakens'
+        ? 'Restrict or reduce Tier 3.'
+        : 'Not yet enough entered to read the channel.'
+  return `Modelled: ${parts.join(', ')}. ${tail}`
 }

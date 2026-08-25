@@ -4,41 +4,89 @@ import type { TierId } from './types'
    Narrative content, centralised so no component hardcodes copy or numbers.
    ========================================================================== */
 
-/** The five questions the dashboard exists to answer, with their anchors. */
+/**
+ * The five questions this has to answer in under two minutes. Each one anchors
+ * to the section that answers it, and together they trace the three layers:
+ * what we see, what the reporting misses, and how the allocation changes.
+ */
 export const FIVE_QUESTIONS = [
   {
     n: 1,
-    q: 'Where is the money today?',
-    a: 'Tier 1 holds 63% of ARR across 18 customers. Tier 2 holds 31% across 140.',
+    q: 'What is the current investment recommendation?',
+    a: '30% Tier 1 protect, 55% Tier 2 scale, 15% Tier 3 acquire. Fork: the multi-tenant scaling engine.',
     anchor: 'money',
+    layer: 'Layer 1',
   },
   {
     n: 2,
-    q: 'What does that revenue cost us?',
-    a: 'Tier 1 hosting alone is ~14.7% of its ARR vs ~5.1% for Tier 2. Fully loaded cost is unmeasured.',
-    anchor: 'money',
+    q: 'Why does each tier get that allocation?',
+    a: 'Reach per fix. Tier 1 work reaches 1 customer, Tier 2 work reaches 140, Tier 3 guardrails reach 1,200 keys.',
+    anchor: 'trapped',
+    layer: 'Layer 1',
   },
   {
     n: 3,
-    q: 'Where is engineering capacity trapped?',
-    a: '3 Tier-1 accounts took 68% of developer velocity. 52% of alerts come from Tier 3.',
-    anchor: 'trapped',
+    q: 'What is the hidden flaw in the current reporting?',
+    a: 'No tier connects revenue to engineering consumption, reliability, or downstream conversion.',
+    anchor: 'blindspots',
+    layer: 'Layer 2',
   },
   {
     n: 4,
-    q: 'Which tier scales repeatably?',
-    a: 'Tier 2. Its constraint is a platform fix that reaches all 140 customers at once.',
-    anchor: 'trapped',
+    q: 'What data would make us change the allocation?',
+    a: 'Five decision gates, each with the instrument that reports it and the allocation it pre-commits to.',
+    anchor: 'gates',
+    layer: 'Layer 3',
   },
   {
     n: 5,
-    q: 'Where does the next engineering dollar go — and what would change that?',
-    a: '55% to Tier 2, behind eight named decision gates and a 30-day instrumentation deadline.',
-    anchor: 'gates',
+    q: 'How will we know within 90 days whether the thesis is right?',
+    a: 'Instrument by day 30, fix by day 60, confirm or revise 30 / 55 / 15 in writing by day 90.',
+    anchor: 'plan',
+    layer: 'Layer 3',
   },
 ] as const
 
-/** Section 3 — the engineering capacity trap. */
+/**
+ * Layer 2 of the dashboard: what the current reporting misses.
+ * Each tier is scored today on metrics that cannot see its actual constraint.
+ */
+export const BLIND_SPOTS: Record<
+  TierId,
+  { reported: string; missing: string; proof: string; implication: string }
+> = {
+  t1: {
+    reported: 'ARR / NRR',
+    missing: 'Engineering consumption and fully loaded contribution margin',
+    proof: '3 accounts consumed 68% of developer velocity',
+    implication:
+      'Revenue concentration is not the only risk. There is also engineering concentration.',
+  },
+  t2: {
+    reported: 'ARR / churn',
+    missing: 'Whether reliability is suppressing the economics of an otherwise scalable architecture',
+    proof: '98.2% availability + peak-hour cascading timeouts',
+    implication: 'Tier 2 may have a fixable execution problem, not a broken business model.',
+  },
+  t3: {
+    reported: 'ARR / NRR / churn',
+    missing: 'Downstream customer creation and operational noise as separate issues',
+    proof: '22 current Tier-2 customers originated in Tier 3',
+    implication: 'Tier 3 may be a funnel being scored as a destination.',
+  },
+}
+
+export const BLIND_SPOT_CONCLUSION =
+  'The allocation debate is happening on top of a reporting architecture that does not connect revenue to resource consumption, reliability, or downstream conversion.'
+
+/** Per-tier KPI sets. What each tier is actually managed on. */
+export const TIER_KPIS: Record<TierId, string[]> = {
+  t1: ['Contribution margin', 'Engineering hours per account', 'Deployment time', 'NRR'],
+  t2: ['Availability', 'Logo churn', 'NRR', 'Infrastructure cost per customer'],
+  t3: ['Graduation rate', 'Downstream ARR', 'Downstream retention', 'Alert burden / SRE capacity'],
+}
+
+/** Section 3 — where engineering leverage breaks. */
 export const LEVERAGE_CARDS: Record<
   TierId,
   {

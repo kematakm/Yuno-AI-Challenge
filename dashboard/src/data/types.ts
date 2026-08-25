@@ -40,6 +40,7 @@ export interface TierFacts {
   logoChurn: number | null
   hostingPerAccount: number | null
   hostingTotal: number | null
+  /** Engineering-leverage statement. Never a bare 'High'/'Low' without context. */
   scalability: string
   constraint: string
   recommendedAllocation: number

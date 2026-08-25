@@ -53,9 +53,13 @@ export function ExecutiveHeader({
       <div className="mb-4 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
         <div className="min-w-0">
           <div className="eyebrow">Board packet · FY engineering & product investment</div>
-          <h1 className="mt-1.5 max-w-[24ch] text-[26px] leading-[1.1] font-bold sm:text-[32px]">
-            Where the next engineering dollar goes
+          <h1 className="mt-1.5 max-w-[26ch] text-[26px] leading-[1.1] font-bold sm:text-[32px]">
+            Capital Allocation &amp; Scaling Operating System
           </h1>
+          <p className="mt-2 max-w-[62ch] text-[13px] leading-[1.5]" style={{ color: 'var(--muted)' }}>
+            How we protect current ARR, scale repeatable infrastructure, and revise investment as
+            evidence improves.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span

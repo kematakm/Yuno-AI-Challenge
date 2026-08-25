@@ -22,10 +22,14 @@ src/
     narrative.ts     Section copy: leverage cards, framework, GTM matrix, 90-day plan.
   lib/
     calc.ts        Every formula, pure and commented. Returns `null` where data is missing.
+    signals.ts     Decision-gate evaluation: maps scenario inputs to supports / argues-against /
+                   awaiting / not-modellable, with pre-committed thresholds in one place.
     format.ts      Currency, percentage, hours and FTE formatting.
     validation.ts  Input parsing and range specs (no negative ARR, no >100% availability, …).
   hooks/
     useAllocation.ts     Allocation state, locking, auto-rebalance, largest-remainder rounding.
+    useScenario.ts       One scenario shared by the calculators that produce it and the gates
+                         that read it. This is what makes the gates live.
     useNumericFields.ts  Raw-text-backed assumption inputs so "blank" stays a real state.
   components/
     ui/            Card, Section, Stat, Tag, Field, BenchmarkScale, ShareBar, Tooltip.
@@ -52,6 +56,7 @@ All of these live in `src/lib/calc.ts`.
 | Modelled downstream ARR | `cohort × modelled conversion × average Tier-2 ARR` |
 | Post-fix alert share | `0.52(1 − r) ÷ (1 − 0.52r)` — the non-Tier-3 half does not shrink |
 | SRE capacity reclaimed | `alerts eliminated × hours per alert × 12` |
+| Infra as % of projected ARR | `projected infra total ÷ (avg ARR × projected customers)` — the leverage test |
 
 ## Data integrity rules enforced in code
 
@@ -66,6 +71,7 @@ All of these live in `src/lib/calc.ts`.
 8. Tier 3 is not assumed to deserve permanent funding — a `LESS TIER 3` gate is on the page.
 9. Calculated and observed values are visually distinguished by provenance tag everywhere.
 10. Every scenario output is labelled Illustrative, Modelled, Scenario or Ceiling.
+11. Decision-gate signals are labelled modelled, never observed, and never move the allocation.
 
 ## Validation
 

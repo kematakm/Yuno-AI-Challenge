@@ -7,6 +7,7 @@ import {
   type Verdict,
 } from '@/data/benchmarks'
 import { TIERS, TIER_DETAIL, TIER_LIST } from '@/data/caseFacts'
+import { TIER_KPIS } from '@/data/narrative'
 import type { Provenance, TierId } from '@/data/types'
 import { hostingPctOfArr, derivedAvgArr } from '@/lib/calc'
 import { availability, num, pct, ratioPct, usd, usdExact } from '@/lib/format'
@@ -170,9 +171,19 @@ function buildRows(): Row[] {
       },
     },
     {
+      key: 'kpis',
+      label: 'Core KPIs',
+      hint: 'What this tier is managed on. Each tier is judged on its own constraint, not on a single shared metric.',
+      cells: {
+        t1: { value: <KpiList tierId="t1" />, tag: 'calc' },
+        t2: { value: <KpiList tierId="t2" />, tag: 'calc' },
+        t3: { value: <KpiList tierId="t3" />, tag: 'calc' },
+      },
+    },
+    {
       key: 'scalability',
-      label: 'Scalability',
-      hint: 'A judgement drawn from the architecture and the constraint, not a measured metric.',
+      label: 'Engineering leverage',
+      hint: 'How far one unit of engineering work travels in this tier. A judgement drawn from the architecture and the constraint, not a measured metric.',
       cells: {
         t1: { value: t1.scalability, tag: 'calc' },
         t2: { value: t2.scalability, tag: 'calc' },
@@ -202,7 +213,7 @@ export function TierScorecard({ allocation }: { allocation: Record<TierId, numbe
   return (
     <Section
       id="scorecard"
-      eyebrow="Tier scorecard"
+      eyebrow="Layer 1 · What we see today"
       title="The three tiers, on the same metrics"
       lede="Status colours are assigned only where a published external benchmark exists. Where the packet has no number, the cell says so."
       aside={<Tag kind="benchmark" label="Status vs external benchmarks" />}
@@ -340,7 +351,31 @@ function TierHeading({ tierId, allocation }: { tierId: TierId; allocation: Recor
           engineering allocation
         </span>
       </div>
+      <div
+        className="mt-2 rounded-[3px] px-2 py-1.5"
+        style={{ background: t.accentSoft, border: `1px solid color-mix(in srgb, ${t.accent} 32%, transparent)` }}
+      >
+        <div className="text-[9px] font-bold tracking-[0.1em]" style={{ color: t.ink }}>
+          PRIMARY CONSTRAINT
+        </div>
+        <div className="mt-0.5 text-[11px] leading-snug font-semibold" style={{ color: 'var(--ink)' }}>
+          {t.constraint}
+        </div>
+      </div>
     </div>
+  )
+}
+
+/** The KPI set a tier is actually managed on. */
+function KpiList({ tierId }: { tierId: TierId }) {
+  return (
+    <ul className="grid gap-0.5 font-normal">
+      {TIER_KPIS[tierId].map((k) => (
+        <li key={k} className="text-[11px] leading-snug" style={{ color: 'var(--body)' }}>
+          · {k}
+        </li>
+      ))}
+    </ul>
   )
 }
 

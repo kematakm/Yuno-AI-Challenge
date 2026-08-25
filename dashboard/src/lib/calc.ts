@@ -168,8 +168,8 @@ export function tier1Margin(costs: Tier1Costs): Tier1MarginResult {
 export interface Tier2Inputs {
   targetChurnPct: number
   targetAvailabilityPct: number
-  /** Net new customers modelled for the coming year. */
-  netNewCustomers: number
+  /** Absolute customer count modelled for the coming year. */
+  projectedCustomers: number
   /** Growth applied to per-customer infrastructure cost. */
   infraCostGrowthPct: number
   additionalEngInvestment: number | null
@@ -195,6 +195,10 @@ export interface Tier2Result {
   projectedHostingPerCustomer: number
   projectedHostingTotal: number
   currentHostingTotal: number
+  currentHostingPctOfArr: number
+  /** Infrastructure as a share of projected ARR. The leverage test. */
+  projectedHostingPctOfArr: number
+  projectedArr: number
   /** Illustrative ARR protected ÷ additional engineering investment. */
   returnMultiple: number | null
 }
@@ -216,7 +220,7 @@ export function tier2Reliability(inputs: Tier2Inputs): Tier2Result {
   const t = TIERS.t2
   const baseCustomers = t.accounts
   const currentChurnPct = (t.logoChurn ?? 0) * 100
-  const projectedCustomers = Math.max(0, baseCustomers + inputs.netNewCustomers)
+  const projectedCustomers = Math.max(0, inputs.projectedCustomers)
 
   const currentLogosLost = baseCustomers * (currentChurnPct / 100)
   const targetLogosLost = baseCustomers * (inputs.targetChurnPct / 100)
@@ -225,6 +229,7 @@ export function tier2Reliability(inputs: Tier2Inputs): Tier2Result {
   const churnDelta = (currentChurnPct - inputs.targetChurnPct) / 100
   const projectedLogosRetained = projectedCustomers * churnDelta
 
+  const projectedArr = inputs.avgArr * projectedCustomers
   const currentHostingPerCustomer = t.hostingPerAccount ?? 0
   const projectedHostingPerCustomer = currentHostingPerCustomer * (1 + inputs.infraCostGrowthPct / 100)
 
@@ -244,9 +249,13 @@ export function tier2Reliability(inputs: Tier2Inputs): Tier2Result {
     currentHostingPerCustomer,
     projectedHostingPerCustomer,
     currentHostingTotal: t.hostingTotal ?? 0,
+    currentHostingPctOfArr: ((t.hostingTotal ?? 0) / t.arr) * 100,
     // Linear scaling assumption: per-customer cost held flat on a cluster that
     // already fails at peak. Treat this as a floor, not an estimate.
     projectedHostingTotal: projectedHostingPerCustomer * projectedCustomers,
+    projectedArr,
+    projectedHostingPctOfArr:
+      projectedArr > 0 ? ((projectedHostingPerCustomer * projectedCustomers) / projectedArr) * 100 : 0,
     returnMultiple:
       inputs.additionalEngInvestment && inputs.additionalEngInvestment > 0
         ? (logosRetained * inputs.avgArr) / inputs.additionalEngInvestment
@@ -261,6 +270,11 @@ export function tier2Reliability(inputs: Tier2Inputs): Tier2Result {
 export interface Tier3Inputs {
   /** Historical eligible sandbox cohort. Unknown today — must stay blank until measured. */
   historicalCohortSize: number | null
+  /**
+   * Measured total graduates, once the cohort work produces one. Falls back to the
+   * packet's 22 still-active graduates, which is a floor rather than a total.
+   */
+  actualGraduates: number | null
   /** Forward-looking conversion assumption for the modelled ARR scenario. */
   modelledConversionPct: number | null
   targetAlertReductionPct: number
@@ -275,6 +289,9 @@ export interface Tier3Inputs {
 
 export interface Tier3Result {
   knownGraduates: number
+  /** The numerator actually used: the measured count if entered, else the packet's 22. */
+  graduatesUsed: number
+  graduatesAreFloor: boolean
   activeKeys: number
   /** 22 ÷ historical cohort. A LOWER BOUND: churned graduates are not in the 22. */
   observedConversionPct: number | null
@@ -308,7 +325,9 @@ export function tier3Funnel(inputs: Tier3Inputs): Tier3Result {
   const currentAlertShare = TIER_DETAIL.t3.alertShare
 
   const cohort = inputs.historicalCohortSize
-  const observedConversionPct = cohort && cohort > 0 ? (knownGraduates / cohort) * 100 : null
+  const graduatesUsed = inputs.actualGraduates ?? knownGraduates
+  const graduatesAreFloor = inputs.actualGraduates === null
+  const observedConversionPct = cohort && cohort > 0 ? (graduatesUsed / cohort) * 100 : null
 
   const modelledGraduates =
     cohort && cohort > 0 && inputs.modelledConversionPct !== null
@@ -333,6 +352,8 @@ export function tier3Funnel(inputs: Tier3Inputs): Tier3Result {
 
   return {
     knownGraduates,
+    graduatesUsed,
+    graduatesAreFloor,
     activeKeys,
     observedConversionPct,
     modelledGraduates,

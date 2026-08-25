@@ -31,7 +31,7 @@ export const TIERS: Record<TierId, TierFacts> = {
     segment: 'High-Volume Enterprise',
     productName: 'Core API Engine',
     role: 'PROTECT',
-    roleLine: 'Revenue engine. Fund protection and de-risking, not replication.',
+    roleLine: 'Revenue engine. Fund protection and de-risking; single-tenancy currently limits engineering leverage.',
     architecture: 'Single-tenant, isolated',
     accountUnit: 'customers',
     accounts: 18,
@@ -42,7 +42,7 @@ export const TIERS: Record<TierId, TierFacts> = {
     logoChurn: null, // not stated in the packet
     hostingPerAccount: 180_000,
     hostingTotal: 3_240_000,
-    scalability: 'Low – Medium',
+    scalability: 'Low current engineering leverage',
     constraint: 'Bespoke engineering / legacy architecture',
     recommendedAllocation: 30,
     accent: 'var(--t1)',
@@ -68,7 +68,7 @@ export const TIERS: Record<TierId, TierFacts> = {
     logoChurn: 0.16,
     hostingPerAccount: 4_000,
     hostingTotal: 560_000,
-    scalability: 'High',
+    scalability: 'High potential engineering leverage',
     constraint: 'Reliability / peak-hour rate limiting',
     recommendedAllocation: 55,
     accent: 'var(--t2)',
@@ -94,7 +94,7 @@ export const TIERS: Record<TierId, TierFacts> = {
     logoChurn: 0.42,
     hostingPerAccount: null, // described as "negligible" — never measured
     hostingTotal: null,
-    scalability: 'High once automated',
+    scalability: 'High acquisition scalability once controlled',
     constraint: 'Guardrails / abuse / alert burden',
     recommendedAllocation: 15,
     accent: 'var(--t3)',
@@ -145,7 +145,7 @@ export const EXEC_POSITIONS = [
   {
     who: 'CEO',
     position: 'Shift engineering toward Tier 1 — it holds the largest ARR.',
-    tension: 'Largest ARR is not the same as best return on the next engineering dollar.',
+    tension: 'Largest ARR does not by itself establish the best return on the next engineering dollar.',
   },
   {
     who: 'VP Product',

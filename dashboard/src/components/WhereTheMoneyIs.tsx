@@ -27,7 +27,7 @@ export function WhereTheMoneyIs() {
   return (
     <Section
       id="money"
-      eyebrow="Questions 1 & 2"
+      eyebrow="Layer 1 · What we see today"
       title="Where the money is — and what that revenue costs"
       lede="Five distributions across the same three tiers. They do not line up, and every gap between them is a capital-allocation question."
       aside={<Tag kind="fact" label="Case facts + derived shares" />}
