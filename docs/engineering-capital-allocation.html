@@ -1,0 +1,623 @@
+<title>Engineering Capital Allocation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --paper:#F6F7F9;
+  --surface:#FFFFFF;
+  --ink:#131C24;
+  --body:#2C3944;
+  --muted:#63717E;
+  --rule:#DCE1E7;
+  --rule-strong:#BFC8D1;
+  --t1:#14556E;
+  --t2:#2A87A6;
+  --t3:#83BACD;
+  --t1-soft:#E4EDF2;
+  --t2-soft:#E3F0F5;
+  --t3-soft:#EDF5F8;
+  --flag:#9C4A21;
+  --flag-bg:#FAEFE8;
+  --shadow:0 1px 2px rgba(19,28,36,.05), 0 8px 24px -18px rgba(19,28,36,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E141A;
+    --surface:#151E26;
+    --ink:#EAF0F4;
+    --body:#BFCBD5;
+    --muted:#8B99A6;
+    --rule:#253039;
+    --rule-strong:#36434F;
+    --t1:#4FA8C7;
+    --t2:#79C6DC;
+    --t3:#A9DCEA;
+    --t1-soft:#16303C;
+    --t2-soft:#152C36;
+    --t3-soft:#142630;
+    --flag:#E39A66;
+    --flag-bg:#291B12;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E141A;
+  --surface:#151E26;
+  --ink:#EAF0F4;
+  --body:#BFCBD5;
+  --muted:#8B99A6;
+  --rule:#253039;
+  --rule-strong:#36434F;
+  --t1:#4FA8C7;
+  --t2:#79C6DC;
+  --t3:#A9DCEA;
+  --t1-soft:#16303C;
+  --t2-soft:#152C36;
+  --t3-soft:#142630;
+  --flag:#E39A66;
+  --flag-bg:#291B12;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--body);
+  font-family:"Source Serif 4","Iowan Old Style",Georgia,serif;
+  font-size:17.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:1120px;
+  margin:0 auto;
+  padding:clamp(28px,5vw,72px) clamp(18px,4vw,48px) 96px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+}
+.col{max-width:68ch}
+
+/* ---------- type ---------- */
+h1,h2,h3,.label,.eyebrow,.num{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+h1{
+  font-size:clamp(2.1rem,5vw,3.15rem);
+  line-height:1.04;
+  letter-spacing:-.022em;
+  font-weight:700;
+  color:var(--ink);
+  margin:.15em 0 .3em;
+  text-wrap:balance;
+}
+h2{
+  font-size:clamp(1.28rem,2.6vw,1.62rem);
+  line-height:1.2;
+  letter-spacing:-.014em;
+  font-weight:600;
+  color:var(--ink);
+  margin:0 0 .5em;
+  text-wrap:balance;
+}
+h3{
+  font-size:1.02rem;
+  letter-spacing:.005em;
+  font-weight:600;
+  color:var(--ink);
+  margin:2em 0 .4em;
+}
+p{margin:0 0 1.05em}
+strong{font-weight:600;color:var(--ink)}
+em{font-style:italic}
+.eyebrow{
+  font-size:.7rem;
+  font-weight:600;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.label{
+  font-size:.68rem;
+  font-weight:600;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- masthead ---------- */
+header.mast{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:34px}
+.mast .col{max-width:24ch}
+.meta{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:2px 18px;
+  margin-top:20px;
+  max-width:62ch;
+  font-size:.94rem;
+}
+.meta dt{color:var(--muted);font-family:Archivo,sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding-top:.42em}
+.meta dd{margin:0;color:var(--ink)}
+
+/* ---------- recommendation ---------- */
+.rec{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:3px;
+  box-shadow:var(--shadow);
+  padding:clamp(20px,3.2vw,34px);
+  margin-bottom:38px;
+}
+.split{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:26px;
+}
+@media (min-width:820px){
+  .split{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:44px;align-items:start}
+}
+.alloc{display:flex;flex-direction:column;gap:14px}
+.bar{
+  display:flex;
+  height:60px;
+  border-radius:2px;
+  overflow:hidden;
+  gap:2px;
+  background:var(--rule);
+}
+.seg{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-family:Archivo,sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:-.01em;
+  animation:grow .7s cubic-bezier(.2,.7,.25,1) both;
+}
+.seg-1{flex:0 0 calc(30% - 1.34px);background:var(--t1)}
+.seg-2{flex:0 0 calc(55% - 1.33px);background:var(--t2);animation-delay:.09s}
+.seg-3{flex:0 0 calc(15% - 1.33px);background:var(--t3);color:#0E141A;animation-delay:.18s}
+@keyframes grow{from{transform:scaleX(.2);opacity:0;transform-origin:left}to{transform:scaleX(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.seg{animation:none}}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.legend div{border-top:3px solid var(--rule-strong);padding-top:7px;font-size:.85rem;line-height:1.35;color:var(--muted)}
+.legend .n{display:block;font-family:Archivo,sans-serif;font-weight:600;color:var(--ink);font-size:.8rem;letter-spacing:.02em}
+.legend .l1{border-top-color:var(--t1)}
+.legend .l2{border-top-color:var(--t2)}
+.legend .l3{border-top-color:var(--t3)}
+.fork{
+  margin-top:4px;
+  padding:12px 14px;
+  background:var(--t2-soft);
+  border-left:3px solid var(--t2);
+  font-size:.95rem;
+}
+.fork .label{display:block;margin-bottom:2px}
+.fork b{color:var(--ink);font-weight:600}
+
+/* ---------- flags ---------- */
+.flags{display:grid;gap:14px;margin:0 0 44px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:820px){.flags{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.flag{
+  background:var(--flag-bg);
+  border:1px solid color-mix(in srgb,var(--flag) 26%,transparent);
+  border-radius:3px;
+  padding:16px 18px;
+  font-size:.97rem;
+}
+.flag .label{color:var(--flag);display:block;margin-bottom:6px}
+.flag p{margin:0}
+.flag p+p{margin-top:.6em}
+
+/* ---------- numbered sections ---------- */
+section{
+  border-top:1px solid var(--rule);
+  padding-top:30px;
+  margin-top:38px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:6px;
+}
+@media (min-width:900px){
+  section{grid-template-columns:64px minmax(0,1fr);column-gap:34px}
+}
+.num{
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  color:var(--t2);
+  padding-top:.42em;
+  font-variant-numeric:tabular-nums;
+}
+.sec-body{max-width:68ch;min-width:0}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;margin:1.4em 0 1.6em;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:520px}
+caption{caption-side:top;text-align:left;padding:12px 16px 0;font-family:Archivo,sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.45}
+thead th{
+  font-family:Archivo,sans-serif;
+  font-size:.66rem;
+  font-weight:600;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:1px solid var(--rule-strong);
+  white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.figure{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.tier-cell{white-space:nowrap;font-weight:600;color:var(--ink)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.d1{background:var(--t1)}.d2{background:var(--t2)}.d3{background:var(--t3)}
+.day{
+  display:inline-block;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:.78rem;
+  padding:2px 8px;
+  border-radius:2px;
+  background:var(--t3-soft);
+  color:var(--ink);
+  border:1px solid var(--rule);
+  white-space:nowrap;
+}
+
+/* ---------- tier cards ---------- */
+.tiers{display:grid;gap:16px;grid-template-columns:minmax(0,1fr);margin:8px 0 4px}
+@media (min-width:900px){.tiers{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tier{
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-top:4px solid var(--rule-strong);
+  border-radius:3px;
+  padding:18px 20px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  font-size:.95rem;
+}
+.tier.k1{border-top-color:var(--t1)}
+.tier.k2{border-top-color:var(--t2)}
+.tier.k3{border-top-color:var(--t3)}
+.tier .pct{font-family:Archivo,sans-serif;font-size:2rem;font-weight:700;line-height:1;color:var(--ink);letter-spacing:-.02em}
+.tier h3{margin:0;font-size:.95rem}
+.tier p{margin:0;font-size:.93rem;line-height:1.5}
+.tier .measured{
+  margin-top:auto;
+  padding-top:12px;
+  border-top:1px solid var(--rule);
+  font-size:.84rem;
+  color:var(--muted);
+  line-height:1.45;
+}
+.tier .measured .label{display:block;margin-bottom:4px}
+
+/* ---------- executive positions ---------- */
+.exec{display:grid;gap:0;margin-top:6px}
+.exec article{border-top:1px solid var(--rule);padding:18px 0}
+.exec article:first-child{border-top:none;padding-top:4px}
+.exec h3{margin:0 0 2px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.stance{
+  font-family:"Source Serif 4",Georgia,serif;
+  font-style:italic;
+  font-size:1.02rem;
+  color:var(--ink);
+  margin:0 0 .7em;
+}
+.exec p:last-child{margin-bottom:0}
+
+/* ---------- 90 day plan ---------- */
+.phases{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.phases{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.phase{border-top:2px solid var(--t2);padding-top:12px;font-size:.94rem}
+.phase .label{display:block;color:var(--t2);margin-bottom:2px}
+.phase h3{margin:0 0 .45em;font-size:1rem}
+.phase p{margin:0;line-height:1.5}
+.phase ul{margin:.2em 0 0;padding-left:1.05em;line-height:1.5}
+.phase li{margin-bottom:.4em}
+
+.closing{
+  margin-top:40px;
+  border-top:2px solid var(--ink);
+  padding-top:24px;
+  max-width:68ch;
+}
+footer{
+  margin-top:56px;
+  border-top:1px solid var(--rule);
+  padding-top:16px;
+  font-size:.8rem;
+  color:var(--muted);
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 20px;
+}
+a{color:var(--t1)}
+:focus-visible{outline:2px solid var(--t2);outline-offset:2px}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <span class="eyebrow">Board packet &middot; Next-year planning</span>
+    <div class="col"><h1>Engineering Capital Allocation</h1></div>
+    <dl class="meta">
+      <dt>To</dt><dd>CEO, for Board review</dd>
+      <dt>From</dt><dd>Head of Product &amp; Engineering Strategy</dd>
+      <dt>Re</dt><dd>Where next year's engineering capital and headcount go</dd>
+    </dl>
+  </header>
+
+  <div class="rec">
+    <div class="split">
+      <div class="alloc">
+        <span class="label">The recommendation</span>
+        <div class="bar" role="img" aria-label="Allocation: 30 percent Tier 1 Enterprise, 55 percent Tier 2 Mid Market, 15 percent Tier 3 Self Serve">
+          <div class="seg seg-1">30%</div>
+          <div class="seg seg-2">55%</div>
+          <div class="seg seg-3">15%</div>
+        </div>
+        <div class="legend">
+          <div class="l1"><span class="n">Tier 1 Enterprise</span>Protection and de-risking</div>
+          <div class="l2"><span class="n">Tier 2 Mid Market</span>Scaling</div>
+          <div class="l3"><span class="n">Tier 3 Self Serve</span>Acquisition and margin recovery</div>
+        </div>
+        <div class="fork">
+          <span class="label">Fork selection</span>
+          <b>The Multi-Tenant Scaling Engine.</b>
+        </div>
+      </div>
+      <div>
+        <p>Tier 1 is funded to protect $22M of ARR and reduce the engineering dependency inside it, not to grow it on the current architecture. Tier 2 gets the majority because it is the only tier where one fix reaches every customer. Tier 3 stays because it has produced at least 22 of our current Tier 2 customers and because it is, on the evidence below, the most likely unattributed driver of our cloud cost growth. Fixing it is margin recovery, not just alert reduction.</p>
+        <p style="margin-bottom:0">Two things the Board should read before the percentage.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flags">
+    <div class="flag">
+      <span class="label">Read first &middot; Capacity</span>
+      <p><strong>The percentage is downstream of a capacity question.</strong> We have four infrastructure engineers and nearly everything here is platform work. Section 3 states the headcount decision that has to be made alongside the allocation.</p>
+    </div>
+    <div class="flag">
+      <span class="label">Read first &middot; Evidence</span>
+      <p><strong>One number in this packet is an assumption presented as a measurement, and it is the one holding up the CFO's biggest concern.</strong> Section 2.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="num">01</div>
+    <div class="sec-body">
+      <h2>Three customers have effectively taken the engineering organization</h2>
+      <p>Three Tier 1 accounts consumed 68% of developer velocity over the last two quarters.</p>
+      <p>At tier-average ARR those three represent roughly <strong>$3.66M, about 17% of Tier 1 and 10% of total company ARR.</strong> That figure is probably low. Highest integration complexity usually tracks highest volume, so these are likely above-average accounts and the true number may be materially higher. I flag it because it cuts against my own argument: if those accounts are $6M rather than $3.66M, the engineering consumption is more economically defensible than it looks here, and the day-30 margin work will settle it.</p>
+      <p>Against a roster of 28 backend engineers, 68% of velocity is roughly <strong>19 backend engineers on three customers.</strong> Against the full 44-person engineering organization it is closer to 30 people. The packet does not specify the base. Either reading dismantles the same claim.</p>
+      <p>The proposal to migrate remaining headcount into Tier 1 feature delivery assumes there is remaining headcount. On the narrow reading, about nine backend engineers serve the other 1,355 customers.</p>
+      <p>Tier 1 is genuinely valuable. 114% NRR and 99.95% availability are real and I am not proposing we treat this tier as a cost center. But every additional enterprise logo on single-tenant architecture with an immutable legacy database reproduces the dependency rather than amortizing it.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">02</div>
+    <div class="sec-body">
+      <h2>The CFO's 72% does not mean what the room thinks it means, and the reason matters</h2>
+      <p>Cloud grew 72% while revenue grew 38%. Everyone in the packet treats that as a crisis. Test it with the packet's own numbers.</p>
+      <div class="tablewrap">
+        <table>
+          <caption>Stated hosting cost against tier ARR</caption>
+          <thead>
+            <tr><th scope="col">Tier</th><th scope="col">Stated annual hosting</th><th scope="col">% of tier ARR</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="tier-cell"><span class="dot d1"></span>Tier 1, single tenant</td><td class="figure">$3.24M &nbsp;<span style="color:var(--muted)">(18 &times; $180K)</span></td><td class="figure">~15%</td></tr>
+            <tr><td class="tier-cell"><span class="dot d2"></span>Tier 2, multi tenant</td><td class="figure">$560K &nbsp;<span style="color:var(--muted)">(140 &times; $4K)</span></td><td class="figure">~5%</td></tr>
+            <tr><td class="tier-cell"><span class="dot d3"></span>Tier 3, serverless</td><td class="figure" style="color:var(--flag)">&ldquo;Negligible&rdquo;</td><td class="figure" style="color:var(--flag)">Unmeasured</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Stated total is about <strong>$3.8M against $35M ARR, roughly 11% of revenue.</strong> At 72% growth the prior-year bill was about $2.2M, so cloud added roughly <strong>$1.6M against $9.6M of new revenue, a marginal cost of revenue near 17%.</strong> For infrastructure SaaS that is unremarkable.</p>
+      <p>So one of two things is true, and they lead to different actions.</p>
+      <p><strong>Either</strong> the 72% is a high rate on a small base and the organization is reacting to a percentage rather than a number, in which case the architecture concern is real but not urgent.</p>
+      <p><strong>Or</strong> the per-customer averages are wrong and there is a large pool of cloud spend nobody has attributed to any tier.</p>
+      <p>I think it is the second, and the packet says where it is.</p>
+
+      <h3>&ldquo;Negligible&rdquo; is not a measurement</h3>
+      <p>Tier 3 compute is described as negligible in the same paragraph that describes 1,200 active keys running poorly written loops on a trial tier with no rate limiting. Unbounded loops on serverless is the canonical runaway-compute scenario. The sandbox launched 14 months ago. The cloud line grew 72% over approximately the same window.</p>
+      <p>And the CFO has stated plainly that no cost breakdown by tier exists. Which means &ldquo;negligible&rdquo; was not measured by anyone. It is an assumption carried forward from launch, when the sandbox was a marketing play with no traffic, asserted by an organization that cannot currently produce tier margins.</p>
+      <p>I am not claiming the sandbox is burning millions. I am claiming nobody knows, that it is the most plausible unattributed driver of the number the CFO is worried about, and that we have been making tier decisions using a figure that has never been checked.</p>
+      <div class="flag">
+        <span class="label">Day-30 deliverable</span>
+        <p>Tier 3 compute cost per active key, measured, with the top-decile keys by spend identified.</p>
+      </div>
+      <p style="margin-top:1.05em">This changes what the 15% is buying. Rate limiting and quotas are not primarily an SRE-relief project. They are the most likely available margin recovery in the business, and they are cheap.</p>
+
+      <h3>The architecture comparison still holds</h3>
+      <p>Tier 1 consumes about three times the infrastructure per dollar of ARR that Tier 2 does, and it is the tier the CEO wants to expand. Five additional enterprise logos add roughly <strong>$900K of annual hosting</strong> before an engineer touches them. That comparison survives whatever the Tier 3 instrumentation finds.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">03</div>
+    <div class="sec-body">
+      <h2>The constraint the allocation percentage hides</h2>
+      <p>Roster: <strong>28 backend, 12 frontend, 4 SRE.</strong></p>
+      <p>Nearly everything this recommendation depends on is platform and infrastructure work: rate limiting, capacity management, cascading-failure isolation, quotas, abuse detection, alert routing, cluster scaling, and eventually a multi-tenant path for enterprise-grade workloads.</p>
+      <p>Four people cannot deliver that, and 52% of their pages currently come from free-tier scripts. The SRE Lead's attrition warning is not a morale item. It is delivery risk against every commitment in this document.</p>
+      <p>The Board template asks for one unified percentage. I have given one. The decision that has to be made alongside it:</p>
+      <div class="flag">
+        <span class="label">Decision required</span>
+        <p><strong>Either backend headcount converts into platform and infrastructure headcount, or we hire into it. There is no version of this plan that works with four SREs.</strong></p>
+      </div>
+      <p style="margin-top:1.05em">Conversion first. The fastest available capacity is the engineering currently absorbed by three accounts, and freeing a third of it beats a hiring cycle.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">04</div>
+    <div class="sec-body">
+      <h2>Tier 2 carries the company growth target, which is both the case for it and the risk in it</h2>
+      <p>$35M growing at 38% is <strong>$13.3M of net new ARR</strong> next year.</p>
+      <p>The VP Product's target of 300 customers implies roughly <strong>$12.5M</strong>, or about <strong>94% of the entire company growth number</strong> from one tier.</p>
+      <p>That is the strongest argument for the 55%. It is also the reason the target needs a hostile read rather than an endorsement, and it did not get one in the room.</p>
+      <p><strong>Churn is not netted out.</strong> At 16% annual logo churn on a growing base, reaching 300 net requires roughly <strong>195 gross adds, not 160.</strong> That is a materially different sales and onboarding load.</p>
+      <p><strong>&ldquo;Without adding a single salesperson&rdquo; is untested.</strong> $12.5M of new mid-market ARR at $78K ACV is not obviously a self-serve motion. Part of it plausibly is, via Tier 3 graduation, which is a further reason the sandbox stays funded. The rest needs a stated acquisition path before the Board hears the number.</p>
+      <p><strong>The cost projection is a floor, not an estimate.</strong> Adding 160 customers at the stated $4K would be $640K of incremental hosting. That figure assumes flat per-customer cost on a cluster that already fails at peak today, which is the same linear-scaling assumption I am objecting to on the enterprise side. Cluster capacity expansion, capex, and the cost curve above roughly 200 customers are unknown. <strong>Cost per customer at 200 customers is a day-60 checkpoint, not a day-90 discovery.</strong></p>
+      <p>The tier still wins the fork. 98.2% availability is about <strong>158 hours of downtime a year</strong> against roughly 9 at 99.9%, on a single shared cluster serving 140 customers, which means one fix reaches all of them. Tier 1's problem repeats customer by customer. Tier 2's does not. That asymmetry, not the $640K, is the argument.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">05</div>
+    <div class="sec-body">
+      <h2>Tier 3 is an acquisition engine, and possibly a margin leak</h2>
+      <p>On its own metrics it looks disposable: $2M ARR, 74% NRR, 42% churn, 52% of on-call pages.</p>
+      <p>22 of 140 Tier 2 customers originated in the sandbox, which is 16% of the current base. <strong>That is a floor.</strong> The sandbox is 14 months old, so those 22 could only come from post-launch cohorts, meaning the share of recently acquired Tier 2 customers is higher. The day-30 cohort work will produce the real denominator, in either direction.</p>
+      <p>The operational burden is diagnosable: abusive configurations, unbounded loops, no trial-tier rate limiting, an unoptimized documentation site, and an alerting model that routes non-actionable events to humans. Those are controls we never built. We should not kill an acquisition channel to avoid building rate limiting, particularly when the same controls are the likely compute fix.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">&mdash;</div>
+    <div class="sec-body" style="max-width:none">
+      <h2>The allocation</h2>
+      <div class="tiers">
+        <div class="tier k1">
+          <span class="pct">30%</span>
+          <h3>Tier 1 &middot; Protection and de-risking</h3>
+          <p>Funds revenue protection and reduction of per-customer engineering dependency. Custom work passes a gate: it ships only if it protects material ARR, satisfies a contract, or is reusable across three or more enterprise accounts. Engineering hours tagged by account. Enterprise qualification adds an architecture-fit screen so ACV alone stops qualifying a deal.</p>
+          <p><em>One caveat I owe the CEO: 114% NRR is partly bought with roadmap. A hard protection posture could erode the expansion it is protecting. The gate's reusability test is designed to allow expansion work through while blocking bespoke patching, and I will report on whether that line holds by day 90.</em></p>
+          <div class="measured"><span class="label">Measured on</span>Engineering hours per account, contribution margin per account, deployment cycle time against the current 18 days, NRR.</div>
+        </div>
+        <div class="tier k2">
+          <span class="pct">55%</span>
+          <h3>Tier 2 &middot; Scaling</h3>
+          <p>Funds rate limiting, peak-hour capacity, cascading-failure isolation, resilience, and cluster expansion. Becomes the default motion for any customer without a genuine enterprise architectural requirement.</p>
+          <div class="measured"><span class="label">Measured on</span>Availability, logo churn, NRR, infrastructure cost per customer, gross adds against the 195 requirement.</div>
+        </div>
+        <div class="tier k3">
+          <span class="pct">15%</span>
+          <h3>Tier 3 &middot; Acquisition and margin recovery</h3>
+          <p>Funds quotas, trial-tier rate limiting, abuse detection, automated mitigation, alert aggregation and routing, documentation. Reported on graduation rate into Tier 2 and post-graduation retention, not on ARR and NRR. Sales does not prospect here; engagement triggers on production-readiness signals.</p>
+          <div class="measured"><span class="label">Measured on</span>Compute cost per active key, graduation rate, time to graduate, retention after graduation, alert volume, SRE hours consumed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">&mdash;</div>
+    <div class="sec-body" style="max-width:none">
+      <h2>Kill switches</h2>
+      <div class="col">
+        <p>Contribution margin means <strong>fully loaded margin per ARR dollar</strong>, including hosting, custom engineering, SRE, QA, implementation, and support. Stated so the trigger produces a decision rather than an argument about basis.</p>
+        <p>If two triggers fire together, the tier-reducing trigger resolves first and the freed points go to the tier named by the higher-priority trigger, in table order.</p>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <caption>Triggers in resolution priority order</caption>
+          <thead>
+            <tr><th scope="col">Trigger</th><th scope="col">By</th><th scope="col">Effect</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Tier 3 compute is material and rate limiting recovers meaningful spend</td><td><span class="day">Day 30</span></td><td>Tier 3 to 20%, funded from Tier 1</td></tr>
+            <tr><td>Tier 1 fully loaded margin per ARR dollar comes back below Tier 2</td><td><span class="day">Day 30</span></td><td>Tier 1 to 20%, Tier 2 to 65%</td></tr>
+            <tr><td>The three high-consumption accounts clear 60% loaded margin</td><td><span class="day">Day 30</span></td><td>Gate relaxed for those accounts specifically, not tier-wide</td></tr>
+            <tr><td>Tier 3 graduation rate flat or declining across all 14 monthly cohorts</td><td><span class="day">Day 30</span></td><td>Tier 3 to 5%, points to Tier 2</td></tr>
+            <tr><td>Tier 3 alert volume not down at least 60% after controls ship</td><td><span class="day">Day 60</span></td><td>Restrict trial tier to invited developers</td></tr>
+            <tr><td>Tier 2 infrastructure cost per customer above $6K at 200 customers</td><td><span class="day">Day 60</span></td><td>Multi-tenant leverage thesis is wrong. Tier 2 to 40%, points to Tier 1</td></tr>
+            <tr><td>Tier 2 availability below 99.5%</td><td><span class="day">Day 90</span></td><td>Reliability was not the constraint. Hold Tier 2 flat pending diagnosis</td></tr>
+            <tr><td>Tier 3 graduated cohorts retain and expand above Tier 2 average</td><td><span class="day">Day 60</span></td><td>Tier 3 to 25%, funded from Tier 1</td></tr>
+            <tr><td>Tier 2 at 99.5%+ but churn not improved 3 points</td><td><span class="day">Day 180</span></td><td>Churn is fit, pricing, or onboarding. Capital shifts from platform to product</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">&mdash;</div>
+    <div class="sec-body">
+      <h2>Executive positions</h2>
+      <div class="exec">
+        <article>
+          <h3>CEO</h3>
+          <p class="stance">&ldquo;Double down on Tier 1.&rdquo;</p>
+          <p>$22M and 114% NRR must be protected, which is why Tier 1 keeps 30% and a gate rather than a cut. What the ARR figure does not show is that three accounts hold roughly 19 backend engineers, so there is no pool of remaining headcount to migrate. Five more logos on the current architecture add about $900K of hosting and reproduce the dependency five more times. I will protect the tier. I am not recommending we replicate its cost structure to hit a Series B milestone, because the Board will ask about margin at the next raise and we cannot currently answer.</p>
+        </article>
+        <article>
+          <h3>VP Product</h3>
+          <p class="stance">&ldquo;Scale Tier 2 to 300.&rdquo;</p>
+          <p>I agree with the direction and I am backing it with the majority of the capital. Three things have to be fixed in the claim first. 300 net requires about 195 gross adds once 16% churn is netted. 98.2% availability does not support that load today. And &ldquo;without a single salesperson&rdquo; needs an acquisition path, because $12.5M at $78K ACV is 94% of the company growth target riding on a motion nobody has described. Fix the cluster, then we defend the number together.</p>
+        </article>
+        <article>
+          <h3>SRE Lead</h3>
+          <p class="stance">&ldquo;Kill the sandbox.&rdquo;</p>
+          <p>The burden is real and four SREs is untenable, and Section 3 is about your problem, not around it. But 52% of pages from unbounded trial loops is a missing rate limiter, not an argument against self-serve. Those same controls are also, I think, the largest available compute recovery in the business, which means your fix pays for itself twice. 60% page reduction required by day 60, with immediate triage in week one so your team stops bleeding before the fixes ship. If it misses the bar, we restrict the tier to invited developers. Kill the noise before killing the funnel.</p>
+        </article>
+        <article>
+          <h3>CFO</h3>
+          <p class="stance">&ldquo;No margin by tier.&rdquo;</p>
+          <p>You named the gap and the number nobody connected to anything. Two readings: $3.8M against $35M is about 11% of revenue and a ~17% marginal cost of new revenue, which is ordinary, or the per-customer averages are wrong and spend is unattributed. I think it is the second, and I think &ldquo;negligible&rdquo; Tier 3 compute is where it is hiding. That is a day-30 deliverable. Finance owns the cost model, engineering owns effort tagging, RevOps owns funnel instrumentation, I own the allocation and revise it in writing on day 30.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">&mdash;</div>
+    <div class="sec-body" style="max-width:none">
+      <h2>90 day plan</h2>
+      <div class="phases">
+        <div class="phase">
+          <span class="label">Days 1&ndash;30</span>
+          <h3>Instrument</h3>
+          <ul>
+            <li>Fully loaded contribution margin for all 18 Tier 1 accounts, draft day 14, signed off day 21.</li>
+            <li>Engineering hours tagged by account, retroactive two quarters, to confirm the 68% and its base.</li>
+            <li><strong>Tier 3 compute cost per active key with top-decile spenders identified.</strong></li>
+            <li>Tier 3 cohort curve across all 14 months.</li>
+            <li>Tier 2 baseline: availability by hour, rate-limit failure frequency, capacity headroom at peak, coded churn reasons.</li>
+            <li>Immediate Tier 3 alert triage. Headcount conversion proposal to the CEO in week two.</li>
+          </ul>
+        </div>
+        <div class="phase">
+          <span class="label">Days 31&ndash;60</span>
+          <h3>Fix</h3>
+          <ul>
+            <li>Customization gate live.</li>
+            <li>Tier 2 rate limiting and peak-hour capacity ship, availability measured weekly.</li>
+            <li>Tier 3 quotas, abuse detection, alert routing ship by day 45 so the 60% reduction has measurement time.</li>
+            <li>Cost-per-customer curve modeled to 200 customers with cluster capex priced.</li>
+            <li>Allocation confirmed or revised in writing. Enterprise qualification screen live.</li>
+          </ul>
+        </div>
+        <div class="phase">
+          <span class="label">Days 61&ndash;90</span>
+          <h3>Prove</h3>
+          <ul>
+            <li>Tier 1 engineering hours per account trending down and deploy cycle improving from 18 days, with a note on whether that cycle is legacy-core-specific or organization-wide.</li>
+            <li>Tier 2 against 99.5%, early churn signal, gross-add pace against 195.</li>
+            <li>Tier 3 alert volume, compute recovery, graduation path triggering rather than accidental.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="closing">
+        <p>And the structural question underneath all of it: can a customer move from Tier 3 through Tier 2 into enterprise-scale workloads without landing on bespoke single-tenant architecture. If not, the Tier 1 problem regenerates indefinitely and next year's roadmap is a common enterprise-capable multi-tenant path.</p>
+        <p>At day 90 the Board gets margin by tier, engineering consumption by Tier 1 account, Tier 3 compute findings, availability and churn movement, cohort graduation economics, the confirmed or revised allocation, the headcount decision, and one honest line on what I got wrong in the first 30 days.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Engineering Capital Allocation Recommendation</span>
+    <span>Prepared for Board review</span>
+    <span>Allocation revised in writing on day 30</span>
+  </footer>
+
+</div>
