@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q3 Forecast Decision Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* ── Tokens ─────────────────────────────────────────────────────── */
+:root{
+  --paper:#E9EEF1; --surface:#FFFFFF; --surface-sunk:#F2F6F8;
+  --ink:#14212C; --ink-soft:#33475A; --muted:#5E7183;
+  --rule:#C4D0D9; --rule-soft:#DEE6EB;
+  --band:#14212C; --on-band:#EDF3F7; --on-band-muted:#9DB2C1;
+  --cat-closed:#0E4C3F; --cat-commit:#0F4C75; --cat-best:#2C7DA0;
+  --cat-upside:#6E93A8; --cat-out:#8A96A0;
+  --target:#A8721A; --target-soft:#F0E2C4;
+  --bar-track:#DCE4EA; --exec-tint:#FBF4E6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B141B; --surface:#121E28; --surface-sunk:#0F1922;
+    --ink:#E7EEF3; --ink-soft:#C2D0DA; --muted:#8CA1B1;
+    --rule:#273743; --rule-soft:#1B2731;
+    --band:#081117; --on-band:#E7EEF3; --on-band-muted:#8CA1B1;
+    --cat-closed:#43AE91; --cat-commit:#4E9FD4; --cat-best:#6FB8D8;
+    --cat-upside:#93B6C8; --cat-out:#7C8994;
+    --target:#DDA845; --target-soft:#3A2E14;
+    --bar-track:#1D2A34; --exec-tint:#1A1E1B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B141B; --surface:#121E28; --surface-sunk:#0F1922;
+  --ink:#E7EEF3; --ink-soft:#C2D0DA; --muted:#8CA1B1;
+  --rule:#273743; --rule-soft:#1B2731;
+  --band:#081117; --on-band:#E7EEF3; --on-band-muted:#8CA1B1;
+  --cat-closed:#43AE91; --cat-commit:#4E9FD4; --cat-best:#6FB8D8;
+  --cat-upside:#93B6C8; --cat-out:#7C8994;
+  --target:#DDA845; --target-soft:#3A2E14;
+  --bar-track:#1D2A34; --exec-tint:#1A1E1B;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  display:flex; justify-content:center;
+  padding:20px;
+}
+:focus-visible{outline:2px solid var(--target); outline-offset:2px}
+
+.slide{
+  width:100%; max-width:1420px; background:var(--surface);
+  border:1px solid var(--rule);
+  display:flex; flex-direction:column;
+  box-shadow:0 1px 2px rgba(10,25,40,.06), 0 12px 40px rgba(10,25,40,.10);
+}
+
+/* ── Utility type ───────────────────────────────────────────────── */
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted);
+}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── Header band ────────────────────────────────────────────────── */
+.band{
+  background:var(--band); color:var(--on-band);
+  padding:18px 30px 16px;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:32px; flex-wrap:wrap;
+}
+.band h1{
+  margin:0; font-family:Archivo,system-ui,sans-serif;
+  font-weight:800; font-size:clamp(24px,2.55vw,35px);
+  letter-spacing:-.018em; line-height:1.04; text-wrap:balance;
+  color:var(--on-band);
+}
+.band h1 em{font-style:normal; color:var(--target)}
+.band .sub{
+  margin-top:9px; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12.5px; letter-spacing:.03em; color:var(--on-band-muted);
+  font-variant-numeric:tabular-nums;
+}
+.band .sub b{color:var(--on-band); font-weight:600}
+.stamp{
+  text-align:right; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--on-band-muted); line-height:1.7; white-space:nowrap;
+}
+
+/* ── Section frame ──────────────────────────────────────────────── */
+.sec{padding:15px 30px; border-top:1px solid var(--rule-soft)}
+.sec:first-of-type{border-top:0}
+.sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:11px}
+.sec-head h2{
+  margin:0; font-family:Archivo,system-ui,sans-serif; font-weight:700;
+  font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink);
+}
+.sec-head .note{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px; letter-spacing:.04em; color:var(--muted); margin-left:auto;
+}
+
+/* ── Section 1 · Forecast progression ───────────────────────────── */
+.prog{
+  display:flex; align-items:stretch; gap:0;
+  border-top:1px solid var(--rule-soft); border-bottom:1px solid var(--rule-soft);
+}
+.node{flex:1 1 0; padding:14px 20px 13px; min-width:0}
+.node .fig{
+  font-family:Archivo,system-ui,sans-serif; font-weight:800;
+  font-size:clamp(27px,2.75vw,38px); letter-spacing:-.03em; line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.node .lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+  font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--muted); margin-top:7px;
+}
+.node .sub{font-size:12.3px; color:var(--ink-soft); line-height:1.34; margin-top:3px}
+.node .gap{
+  display:inline-block; margin-top:6px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+  font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--target); border:1px solid var(--target); padding:2px 7px;
+  white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+.arrow{
+  display:flex; align-items:center; color:var(--muted);
+  font-size:16px; padding:0 2px; flex:0 0 auto;
+}
+/* the target is a reference marker, not a forecast category */
+.node.target{
+  flex:0 0 auto; background:var(--target-soft);
+  border-left:2px solid var(--target); border-right:2px solid var(--target);
+  padding-left:22px; padding-right:22px;
+}
+.node.target .fig{color:var(--target)}
+.node.target .lab{color:var(--target); letter-spacing:.15em}
+.node.target .sub{color:var(--target); opacity:.85}
+
+.principle{margin-top:14px; display:flex; flex-direction:column; gap:8px}
+.principle .lead{
+  margin:0; font-family:Archivo,system-ui,sans-serif; font-weight:600;
+  font-size:clamp(15px,1.32vw,18px); line-height:1.32; color:var(--ink);
+  text-wrap:balance;
+}
+.principle .stance{
+  margin:0; padding:9px 14px; background:var(--surface-sunk);
+  border-left:3px solid var(--ink); font-size:13.5px; font-weight:500;
+  color:var(--ink-soft); line-height:1.38;
+}
+
+/* ── Section 2 · Deal decision board ────────────────────────────── */
+.board{width:100%; border-collapse:collapse; table-layout:fixed}
+.board th{
+  text-align:left; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--muted); padding:0 10px 7px; border-bottom:1.5px solid var(--ink);
+  vertical-align:bottom;
+}
+.board th:first-child{padding-left:12px}
+.board td{
+  padding:10px 10px; border-bottom:1px solid var(--rule-soft);
+  font-size:12.3px; line-height:1.33; color:var(--ink-soft); vertical-align:top;
+}
+.board tr:last-child td{border-bottom:0}
+.board td.deal{
+  padding-left:12px; border-left:4px solid var(--cat); color:var(--ink);
+}
+.board tr.is-out td{color:var(--muted)}
+.deal-name{
+  font-family:Archivo,system-ui,sans-serif; font-weight:700; font-size:14px;
+  letter-spacing:.005em; color:var(--ink); display:block;
+}
+.is-out .deal-name{color:var(--muted)}
+.deal-val{
+  display:block;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-weight:500;
+  font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;
+}
+.chip{
+  display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  padding:3px 7px; border:1px solid var(--cat); color:var(--cat); white-space:nowrap;
+}
+.chip.solid{background:var(--cat); color:var(--surface); border-color:var(--cat)}
+.call-step{display:flex; flex-direction:column; align-items:flex-start; gap:3px}
+.call-step .chip-to{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  color:var(--muted); line-height:1; padding-left:26px;
+}
+.prio{
+  display:inline-block; margin-top:7px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+  font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+  padding:2px 6px; white-space:nowrap;
+  border:1px solid var(--muted); color:var(--muted);
+}
+.prio.exec{background:var(--target); border-color:var(--target); color:#fff}
+:root[data-theme="dark"] .prio.exec{color:#11202B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .prio.exec{color:#11202B}}
+.prio.validate{border-color:var(--cat-commit); color:var(--cat-commit)}
+.prio.accel{border-color:var(--cat-upside); color:var(--cat-upside)}
+tr.is-exec td{background:var(--exec-tint)}
+.owner{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+  font-weight:500; color:var(--ink);
+}
+.is-out .prio{
+  display:inline-block; margin-top:7px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:9.5px;
+  font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+  padding:2px 6px; white-space:nowrap;
+  border:1px solid var(--muted); color:var(--muted);
+}
+.prio.exec{background:var(--target); border-color:var(--target); color:#fff}
+:root[data-theme="dark"] .prio.exec{color:#11202B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .prio.exec{color:#11202B}}
+.prio.validate{border-color:var(--cat-commit); color:var(--cat-commit)}
+.prio.accel{border-color:var(--cat-upside); color:var(--cat-upside)}
+tr.is-exec td{background:var(--exec-tint)}
+.owner{color:var(--muted)}
+.owner small{display:block; color:var(--muted); font-weight:400; font-size:11px}
+.ev{color:var(--ink); font-weight:500}
+.is-out .ev{color:var(--muted)}
+
+/* ── Sections 3 + 4 side by side ────────────────────────────────── */
+.split{display:grid; grid-template-columns:minmax(0,0.78fr) minmax(0,1.22fr)}
+.split > .sec{border-top:1px solid var(--rule-soft)}
+.split > .sec + .sec{border-left:1px solid var(--rule-soft)}
+
+.interv{display:flex; flex-direction:column; gap:8px}
+.interv .row{display:grid; grid-template-columns:152px 1fr; gap:12px; align-items:start}
+.actor{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.07em; text-transform:uppercase; color:var(--ink);
+  border-left:3px solid var(--cat-commit); padding-left:9px; line-height:1.3;
+}
+.acts{font-size:12.8px; color:var(--ink-soft); line-height:1.42}
+.acts div + div{margin-top:3px}
+.sla{
+  display:inline-block; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10px; font-weight:600; letter-spacing:.08em;
+  color:var(--target); border:1px solid var(--target); padding:1px 6px; margin-left:5px;
+  white-space:nowrap;
+}
+
+.gates{display:grid; grid-template-columns:repeat(4,1fr); gap:0}
+.gate{position:relative; padding:14px 14px 0 0}
+.gate + .gate{padding-left:16px}
+.gate::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--cat-best);
+}
+.gate + .gate::before{left:16px}
+.gate:nth-child(1)::before{background:var(--cat-commit)}
+.gate:nth-child(2)::before{background:var(--target)}
+.gate:nth-child(3)::before{background:var(--cat-best)}
+.gate:nth-child(4)::before{background:var(--cat-closed)}
+.gate .when{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.gate .what{
+  font-family:Archivo,system-ui,sans-serif; font-weight:600; font-size:13.5px;
+  color:var(--ink); line-height:1.25; margin-top:5px; text-wrap:balance;
+}
+
+/* ── Footer · Q4 guardrail + evidence legend ────────────────────── */
+.guard{
+  background:var(--target-soft); border-top:2px solid var(--target);
+  padding:12px 30px 13px; display:flex; flex-direction:column; gap:7px;
+}
+.q4row{display:flex; align-items:baseline; gap:18px; flex-wrap:wrap}
+.q4row .m{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+  color:var(--ink); letter-spacing:.02em; font-variant-numeric:tabular-nums;
+}
+.q4row .m b{
+  font-weight:600; color:var(--muted); text-transform:uppercase;
+  font-size:10px; letter-spacing:.11em; margin-right:5px;
+}
+.q4row .m.short{color:var(--target); font-weight:600}
+.guard .tag{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--target); white-space:nowrap;
+}
+.guard p{margin:0; font-size:13.3px; font-weight:500; color:var(--ink)}
+
+/* ── Responsive fallback (slide is designed for landscape) ──────── */
+@media (max-width:900px){
+  .prog{flex-wrap:wrap}
+  .node{flex:1 1 44%}
+  .arrow{display:none}
+  .split{grid-template-columns:1fr}
+  .split > .sec + .sec{border-left:0}
+  .gates{grid-template-columns:1fr 1fr}
+}
+@media print{
+  @page{size:landscape; margin:8mm}
+  body{background:#fff; padding:0}
+  .slide{border:0; box-shadow:none; max-width:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<main class="slide">
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header class="band">
+    <div>
+      <h1>Q3 Forecast Call — <em>Evidence Before Optimism</em></h1>
+      <div class="sub"><b>23 business days remaining</b> &nbsp;|&nbsp; <b>$5.0M</b> target &nbsp;|&nbsp; <b>$2.15M</b> closed</div>
+    </div>
+  </header>
+
+  <!-- ── 1 · The forecast call ─────────────────────────────────── -->
+  <section class="sec">
+    <div class="sec-head">
+      <h2>The Forecast Call</h2>
+      <span class="note">Scenario levels — not probability-weighted forecasts</span>
+    </div>
+
+    <div class="prog">
+      <div class="node">
+        <div class="fig" style="color:var(--cat-closed)">$2.15M</div>
+        <div class="lab">Closed Won</div>
+        <div class="sub">Banked</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="node">
+        <div class="fig" style="color:var(--cat-best)">$4.65M</div>
+        <div class="lab">Named Best Case</div>
+        <div class="sub">Streamline + GlobalCart + NovaBank</div>
+        <div class="gap">$350K short of Q3 target</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="node target">
+        <div class="fig">$5.0M</div>
+        <div class="lab">Q3 Target</div>
+        <div class="sub">Reference, not a forecast</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="node">
+        <div class="fig" style="color:var(--cat-upside)">$6.05M</div>
+        <div class="lab">Full Named Upside</div>
+        <div class="sub">Adds AeroPay</div>
+      </div>
+    </div>
+
+    <div class="principle">
+      <p class="lead">No additional deal qualifies for Commit today. Streamline is the nearest Commit candidate pending CFO validation.</p>
+      <p class="stance">“Manage aggressively toward $5M+, but promote deals only when buyer evidence changes.”</p>
+    </div>
+  </section>
+
+  <!-- ── 2 · Deal decision board ────────────────────────────────── -->
+  <section class="sec">
+    <div class="sec-head">
+      <h2>Deal Decision Board</h2>
+      <span class="note">All five named Q3 deals</span>
+    </div>
+
+    <div class="board-wrap">
+    <table class="board">
+      <colgroup>
+        <col style="width:12.5%"><col style="width:13%"><col style="width:17%">
+        <col style="width:18%"><col style="width:9.5%"><col style="width:30%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Deal</th>
+          <th>Forecast Call</th>
+          <th>Actual Constraint</th>
+          <th>Next Action</th>
+          <th>Owner</th>
+          <th>Evidence That Changes the Call</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="--cat:var(--cat-commit)">
+          <td class="deal" style="border-left-color:var(--cat-best)">
+            <span class="deal-name">Streamline</span>
+            <span class="deal-val">$500K</span>
+            <span class="prio validate">Validate</span>
+          </td>
+          <td>
+            <span class="call-step">
+              <span class="chip" style="--cat:var(--cat-best)">Best Case</span>
+              <span class="chip-to">↓</span>
+              <span class="chip solid" style="--cat:var(--cat-commit)">Commit candidate</span>
+            </span>
+          </td>
+          <td>CFO budget authorization</td>
+          <td>Validate approval path</td>
+          <td class="owner">Lena</td>
+          <td class="ev">CFO confirms funded approval + signature timing</td>
+        </tr>
+
+        <tr class="is-exec" style="--cat:var(--cat-best)">
+          <td class="deal">
+            <span class="deal-name">GlobalCart</span>
+            <span class="deal-val">$1.15M</span>
+            <span class="prio exec">Exec priority</span>
+          </td>
+          <td><span class="chip solid">Best Case</span></td>
+          <td>True blocker unverified — price / liability / timing</td>
+          <td>Economic-buyer conversation; prepare CEO→COO outreach</td>
+          <td class="owner">Maya <small>+ VP Sales</small></td>
+          <td class="ev">Dated buyer commitment tied to agreed terms</td>
+        </tr>
+
+        <tr class="is-exec" style="--cat:var(--cat-best)">
+          <td class="deal">
+            <span class="deal-name">NovaBank</span>
+            <span class="deal-val">$850K</span>
+            <span class="prio exec">Exec priority</span>
+          </td>
+          <td><span class="chip solid">Best Case</span></td>
+          <td>Competitive decision reopened</td>
+          <td>Direct CFO engagement</td>
+          <td class="owner">Daniel <small>+ VP Sales</small></td>
+          <td class="ev">CFO confirms selection + decision/signature date</td>
+        </tr>
+
+        <tr style="--cat:var(--cat-upside)">
+          <td class="deal">
+            <span class="deal-name">AeroPay</span>
+            <span class="deal-val">$1.4M</span>
+            <span class="prio accel">Acceleration test</span>
+          </td>
+          <td><span class="chip solid">Upside</span></td>
+          <td>Security / legal / procurement timing</td>
+          <td>Build customer-owned critical path</td>
+          <td class="owner">Priya <small>+ VP Sales</small></td>
+          <td class="ev">Customer + internal owners confirm executable Q3 close path</td>
+        </tr>
+
+        <tr class="is-out" style="--cat:var(--cat-out)">
+          <td class="deal">
+            <span class="deal-name">FinGo</span>
+            <span class="deal-val">$700K</span>
+            <span class="prio">Reset</span>
+          </td>
+          <td><span class="chip">Out of Q3</span></td>
+          <td>No sponsor / compelling event / credible timing</td>
+          <td>Reset for future quarter</td>
+          <td class="owner">Marcus</td>
+          <td class="ev">New senior sponsor + compelling event + credible timing</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ── 3 + 4 · Intervention and gates ─────────────────────────── -->
+  <div class="split">
+    <section class="sec">
+      <div class="sec-head"><h2>Executive Intervention</h2></div>
+      <div class="interv">
+        <div class="row">
+          <div class="actor">CEO</div>
+          <div class="acts"><div>GlobalCart COO — only if decision-path relevance is confirmed</div></div>
+        </div>
+        <div class="row">
+          <div class="actor">VP Sales</div>
+          <div class="acts"><div>GlobalCart + NovaBank buyer access</div></div>
+        </div>
+        <div class="row">
+          <div class="actor" style="border-left-color:var(--target)">Legal / CFO</div>
+          <div class="acts"><div>GlobalCart liability decision<span class="sla">24-HR SLA</span></div></div>
+        </div>
+        <div class="row">
+          <div class="actor" style="border-left-color:var(--target)">InfoSec / Legal / Deal Desk</div>
+          <div class="acts"><div>AeroPay feasibility<span class="sla">48-HR SLA</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-head">
+        <h2>23-Day Operating Gates</h2>
+        <span class="note">Internal SLAs are commitments, not forecasts</span>
+      </div>
+      <div class="gates">
+        <div class="gate">
+          <div class="when">Days 1–3</div>
+          <div class="what">Establish buyer truth</div>
+        </div>
+        <div class="gate">
+          <div class="when">By Day 5</div>
+          <div class="what">Advance / exit decisions</div>
+        </div>
+        <div class="gate">
+          <div class="when">Days 6–15</div>
+          <div class="what">Resource only executable paths</div>
+        </div>
+        <div class="gate">
+          <div class="when">Days 16–23</div>
+          <div class="what">Execute confirmed close paths</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── Q4 risk + guardrail ────────────────────────────────────── -->
+  <div class="guard">
+    <div class="q4row">
+      <span class="tag">Q4 Capacity Risk</span>
+      <span class="m"><b>Target</b> $5.5M</span>
+      <span class="m"><b>Pipeline</b> $8.2M</span>
+      <span class="m short"><b>Coverage</b> 1.49×</span>
+      <span class="m"><b>Historical requirement</b> ~3×</span>
+    </div>
+    <p>“Protect ≥30% of AE capacity for Q4 pipeline creation unless a named Q3 buyer milestone justifies a temporary exception.”</p>
+  </div>
+
+</main>
+</body>
+</html>
