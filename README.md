@@ -16,7 +16,9 @@ behind it.
 | [`03_external_research.md`](03_external_research.md) | External benchmarks only · **⚠ awaiting source** |
 | [`04_final_response.md`](04_final_response.md) | **Business source of truth** · **⚠ awaiting source** |
 | [`05_ai_methodology.md`](05_ai_methodology.md) | AI workflow and evidence discipline |
-| [`visuals/q3_forecast_decision_board.html`](visuals/q3_forecast_decision_board.html) | **Primary artifact** — one executive decision slide |
+| [`index.html`](index.html) | **Primary artifact** — one executive decision slide |
+| [`visuals/q3_forecast_decision_board.png`](visuals/q3_forecast_decision_board.png) | Slide as an image |
+| [`visuals/q3_forecast_decision_board.pdf`](visuals/q3_forecast_decision_board.pdf) | Slide as a single-page landscape PDF |
 
 The slide is designed to complement the written response, not repeat it.
 Detailed reasoning belongs in `04_final_response.md`.
