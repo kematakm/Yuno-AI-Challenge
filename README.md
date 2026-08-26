@@ -78,7 +78,7 @@ Recomputed deterministically rather than quoted. Scale: $M.
 
 - `2.15 + 0.50 + 1.15 + 0.85 = 4.65` ✓
 - `4.65 + 1.40 = 6.05` ✓
-- Fingo ($0.70M) is called out of Q3 and is excluded from every scenario above. ✓
+- FinGo ($0.70M) is called out of Q3 and is excluded from every scenario above. ✓
 
 **Load-bearing consequence:** the Named Best Case lands **$0.35M below the
 $5.0M target** even if all three deals close. Clearing the target requires

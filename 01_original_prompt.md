@@ -32,7 +32,7 @@ original case text:
 - Q3 target **$5.0M**; **$2.15M** closed won; **23 business days** remaining.
 - Five named deals with values and owners: Streamline $500K (Lena),
   GlobalCart $1.15M (Maya), NovaBank $850K (Daniel), AeroPay $1.4M (Priya),
-  Fingo $700K (Marcus).
+  FinGo $700K (Marcus).
 
 **Action required:** paste the original challenge text here, then confirm the
 figures above against it.
